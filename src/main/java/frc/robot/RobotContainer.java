@@ -36,22 +36,22 @@ public class RobotContainer {
     private final CommandXboxController joystick = new CommandXboxController(0);
 
     /* Set max speeds */
-    private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond) * .75;// kSpeedAt12Volts desired top speed
+    private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);// kSpeedAt12Volts desired top speed
     private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
 
     /* Setting up control commands of the swerve drive */
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
             .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
-            .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
+            .withDriveRequestType(DriveRequestType.Velocity); // Use open-loop control for drive motors
 
     private final SwerveRequest.RobotCentric driveRobotCentric = new SwerveRequest.RobotCentric()
             .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * .01)
-            .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
+            .withDriveRequestType(DriveRequestType.Velocity);
             
     private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
     private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
     private final SwerveRequest.RobotCentric forwardStraight = new SwerveRequest.RobotCentric()
-            .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
+            .withDriveRequestType(DriveRequestType.Velocity);
 
     private final Telemetry logger = new Telemetry(MaxSpeed);
 
@@ -84,17 +84,17 @@ public class RobotContainer {
         drivetrain.setDefaultCommand(
             // Drivetrain will execute this command periodically
             drivetrain.applyRequest(() ->
-                drive.withVelocityX(-joystick.getLeftY() * (joystick.leftBumper().getAsBoolean() ? 2 : MaxSpeed)) // Drive forward with negative Y (forward)
-                    .withVelocityY(-joystick.getLeftX() * (joystick.leftBumper().getAsBoolean() ? 2 : MaxSpeed)) // Drive left with negative X (left)
-                    .withRotationalRate(-joystick.getRightX() * (joystick.leftBumper().getAsBoolean() ? 2 : MaxSpeed)) // Drive counterclockwise with negative X (left)
+                drive.withVelocityX(-joystick.getLeftY()) // Drive forward with negative Y (forward)
+                    .withVelocityY(-joystick.getLeftX()) // Drive left with negative X (left)
+                    .withRotationalRate(-joystick.getRightX()) // Drive counterclockwise with negative X (left)
             )
         );
 
         joystick.rightBumper().whileTrue(
             drivetrain.applyRequest(() ->
-            driveRobotCentric.withVelocityX(-joystick.getLeftY() * (joystick.leftBumper().getAsBoolean() ? 2 : MaxSpeed))
-                .withVelocityY(-joystick.getLeftX() * (joystick.leftBumper().getAsBoolean() ? 2 : MaxSpeed))
-                .withRotationalRate(-joystick.getRightX() * (joystick.leftBumper().getAsBoolean() ? 2 : MaxSpeed))
+            driveRobotCentric.withVelocityX(-joystick.getLeftY() * (joystick.leftBumper().getAsBoolean() ? .5 : .5))
+                .withVelocityY(-joystick.getLeftX() * (joystick.leftBumper().getAsBoolean() ? .5 : .5))
+                .withRotationalRate(-joystick.getRightX() * (joystick.leftBumper().getAsBoolean() ? .5 : .5))
         ));
   
         joystick.a().whileTrue(leftFeederPathfind);
@@ -103,8 +103,12 @@ public class RobotContainer {
         // reset the field-centric heading on left bumper press
         joystick.start().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
-        drivetrain.registerTelemetry(logger::telemeterize);
+        joystick.back().and(joystick.y()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
+        joystick.back().and(joystick.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
+        joystick.start().and(joystick.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
+        joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
 
+        drivetrain.registerTelemetry(logger::telemeterize);
     }
 
     public Command getAutonomousCommand() {
