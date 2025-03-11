@@ -39,7 +39,7 @@ public class Elevator extends SubsystemBase {
     // This method will be called once per scheduler run
   }
 
-  public void MoveElevator(double speed){
+  public void setElevatorSpeed(double speed){
     LeftElevatorMotor.set(speed);
   }
   
