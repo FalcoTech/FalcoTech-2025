@@ -109,6 +109,12 @@ public class RobotContainer {
         joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
 
         drivetrain.registerTelemetry(logger::telemeterize);
+
+        //TODO
+        // Add CoralIntake, AlgaeIntake, Claw
+        // 1 Rotation at top of elevator = 5.5 in of linear movement or 11.03 in of movement at claw
+        // Max travel is 29in 
+        
     }
 
     public Command getAutonomousCommand() {
