@@ -22,30 +22,32 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
-
+import frc.robot.commands.RunElevator;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.subsystems.Elevator;
 
 public class RobotContainer {
     /* Initialize Game Controllers */
     // private final CommandPS4Controller joystick = new CommandPS4Controller(0);
-    private final CommandXboxController joystick = new CommandXboxController(0);
+    private final CommandXboxController pilot = new CommandXboxController(0);
+    private final CommandXboxController Copilot = new CommandXboxController(1);
 
     /* Set max speeds */
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);// kSpeedAt12Volts desired top speed
     private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
-
     /* Setting up control commands of the swerve drive */
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
             .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
             .withDriveRequestType(DriveRequestType.Velocity); // Use open-loop control for drive motors
 
     private final SwerveRequest.RobotCentric driveRobotCentric = new SwerveRequest.RobotCentric()
-            .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * .01)
+            .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1)
             .withDriveRequestType(DriveRequestType.Velocity);
             
     private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
@@ -67,6 +69,8 @@ public class RobotContainer {
     /* Path follower */
     private final SendableChooser<Command> autoChooser;
 
+    public static final Elevator elevator = new Elevator();
+
     public RobotContainer() {
         /* Put autonomous chooser on dashboard */
         autoChooser = AutoBuilder.buildAutoChooser("Tests");
@@ -84,31 +88,36 @@ public class RobotContainer {
         drivetrain.setDefaultCommand(
             // Drivetrain will execute this command periodically
             drivetrain.applyRequest(() ->
-                drive.withVelocityX(-joystick.getLeftY()) // Drive forward with negative Y (forward)
-                    .withVelocityY(-joystick.getLeftX()) // Drive left with negative X (left)
-                    .withRotationalRate(-joystick.getRightX()) // Drive counterclockwise with negative X (left)
+                drive.withVelocityX(-pilot.getLeftY()) // Drive forward with negative Y (forward)
+                    .withVelocityY(-pilot.getLeftX()) // Drive left with negative X (left)
+                    .withRotationalRate(-pilot.getRightX()) // Drive counterclockwise with negative X (left)
             )
         );
 
-        joystick.rightBumper().whileTrue(
+        pilot.rightBumper().whileTrue(
             drivetrain.applyRequest(() ->
-            driveRobotCentric.withVelocityX(-joystick.getLeftY() * (joystick.leftBumper().getAsBoolean() ? .5 : .5))
-                .withVelocityY(-joystick.getLeftX() * (joystick.leftBumper().getAsBoolean() ? .5 : .5))
-                .withRotationalRate(-joystick.getRightX() * (joystick.leftBumper().getAsBoolean() ? .5 : .5))
+            driveRobotCentric.withVelocityX(-pilot.getLeftY())
+                .withVelocityY(-pilot.getLeftX())
+                .withRotationalRate(-pilot.getRightX())
         ));
   
-        joystick.a().whileTrue(leftFeederPathfind);
-        joystick.b().whileTrue(algaeScoreCommand);
+        // pilot.a().whileTrue(leftFeederPathfind);
+        // pilot.b().whileTrue(algaeScoreCommand);
 
         // reset the field-centric heading on left bumper press
-        joystick.start().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+        pilot.start().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
-        joystick.back().and(joystick.y()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
-        joystick.back().and(joystick.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
-        joystick.start().and(joystick.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
-        joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
+        pilot.back().and(pilot.y()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
+        pilot.back().and(pilot.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
+        pilot.start().and(pilot.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
+        pilot.start().and(pilot.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
 
         drivetrain.registerTelemetry(logger::telemeterize);
+
+
+        //ELEVATOR
+        elevator.setDefaultCommand(new RunElevator(() -> -Copilot.getRightY() * .5));
+        Copilot.start().onTrue(new InstantCommand(() -> elevator.ResetEncoder()));
     }
 
     public Command getAutonomousCommand() {
