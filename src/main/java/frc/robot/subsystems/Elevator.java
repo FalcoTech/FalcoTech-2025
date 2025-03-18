@@ -73,5 +73,4 @@ public class Elevator extends SubsystemBase {
     LeftElevatorEncoder.setPosition(0);
     RightElevatorEncoder.setPosition(0);
   }
-  
 }

@@ -28,9 +28,12 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.commands.RunElevator;
+import frc.robot.commands.Wrist.RunWrist;
+import frc.robot.commands.Wrist.SetWristToPosition;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Elevator;
+import frc.robot.subsystems.Wrist;
 
 public class RobotContainer {
     /* Initialize Game Controllers */
@@ -70,6 +73,7 @@ public class RobotContainer {
     private final SendableChooser<Command> autoChooser;
 
     public static final Elevator elevator = new Elevator();
+    public static final Wrist wrist = new Wrist();
 
     public RobotContainer() {
         /* Put autonomous chooser on dashboard */
@@ -94,13 +98,16 @@ public class RobotContainer {
             )
         );
 
-        pilot.rightBumper().whileTrue(
-            drivetrain.applyRequest(() ->
-            driveRobotCentric.withVelocityX(-pilot.getLeftY())
-                .withVelocityY(-pilot.getLeftX())
-                .withRotationalRate(-pilot.getRightX())
-        ));
-  
+        // pilot.rightBumper().whileTrue(
+        //     new InstantCommand(() -> 
+        //         drivetrain.setControl(
+        //             driveRobotCentric.withVelocityX(0)
+        //                 .withVelocityY(0)
+        //                 .withRotationalRate(0)
+        //         )
+        //     )
+        // );
+        
         // pilot.a().whileTrue(leftFeederPathfind);
         // pilot.b().whileTrue(algaeScoreCommand);
 
@@ -124,6 +131,9 @@ public class RobotContainer {
         //ELEVATOR
         elevator.setDefaultCommand(new RunElevator(() -> -Copilot.getRightY() * .5));
         Copilot.start().onTrue(new InstantCommand(() -> elevator.ResetEncoder()));
+
+        wrist.setDefaultCommand(new RunWrist(() -> Copilot.getLeftY()));
+        Copilot.a().whileTrue(new SetWristToPosition(-1));
     }
 
     public Command getAutonomousCommand() {
