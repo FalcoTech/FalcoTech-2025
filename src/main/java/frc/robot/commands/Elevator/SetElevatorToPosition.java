@@ -2,21 +2,21 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.commands.Wrist;
+package frc.robot.commands.Elevator;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotContainer;
-import frc.robot.subsystems.Wrist;
+import frc.robot.subsystems.Elevator;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
-public class SetWristToPosition extends Command {
-  private final Wrist m_wrist = RobotContainer.wrist;
-  private double position;
-  /** Creates a new SetWristToPosition. */
-  public SetWristToPosition(double Position) {
+public class SetElevatorToPosition extends Command {
+  private final Elevator m_Elevator = RobotContainer.elevator;
+  private double Position; 
+  /** Creates a new SetElevatorToPosition. */
+  public SetElevatorToPosition(double position) {
     // Use addRequirements() here to declare subsystem dependencies.
-    this.position = Position;
-    addRequirements(m_wrist);
+    this.Position = position;
+    addRequirements(m_Elevator);
   }
 
   // Called when the command is initially scheduled.
@@ -26,19 +26,18 @@ public class SetWristToPosition extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    m_wrist.MoveWristToPosition(position);
+    m_Elevator.MoveElevatorToPosition(Position);
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    // m_wrist.StopWrist();
+    m_Elevator.StopElevator();
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    // return m_wrist.GetWristEncoderPosition() == position;
-    return false;
+    return Position == m_Elevator.GetLeftElevatorPosition();
   }
 }

@@ -28,6 +28,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.commands.RunElevator;
+import frc.robot.commands.Elevator.SetElevatorToPosition;
 import frc.robot.commands.Wrist.RunWrist;
 import frc.robot.commands.Wrist.SetWristToPosition;
 import frc.robot.generated.TunerConstants;
@@ -133,7 +134,8 @@ public class RobotContainer {
         Copilot.start().onTrue(new InstantCommand(() -> elevator.ResetEncoder()));
 
         wrist.setDefaultCommand(new RunWrist(() -> Copilot.getLeftY()));
-        Copilot.a().whileTrue(new SetWristToPosition(-1));
+        Copilot.a().whileTrue(new SetWristToPosition(-6));
+        Copilot.b().whileTrue(new SetElevatorToPosition(3));
     }
 
     public Command getAutonomousCommand() {

@@ -36,8 +36,8 @@ public class Elevator extends SubsystemBase {
   private final RelativeEncoder LeftElevatorEncoder = LeftElevatorMotor.getEncoder();
   private final RelativeEncoder RightElevatorEncoder = RightElevatorMotor.getEncoder();
   
-  private final PIDController ElevatorPID = new PIDController(0, 0, 0);
-  private final ElevatorFeedforward ElevatorFF = new ElevatorFeedforward(0, 0, 0, 0);
+  private final PIDController ElevatorPID = new PIDController(0, 0, 0); //kP = .1
+  private final ElevatorFeedforward ElevatorFF = new ElevatorFeedforward(0, .105, 0, 0); //kG = .1
   /** Creates a new Elevator. */
   public Elevator() {
     // LeftElevatorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
@@ -50,6 +50,8 @@ public class Elevator extends SubsystemBase {
     // RightElevatorConfig.follow(LeftElevatorMotor, true);    
     LeftElevatorMotor.configure(LeftElevatorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     RightElevatorMotor.configure(RightElevatorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
+    LeftElevatorEncoder.setPosition(0);
   }
 
   @Override
@@ -57,10 +59,24 @@ public class Elevator extends SubsystemBase {
     // This method will be called once per scheduler run
     SmartDashboard.putNumber("Left Elevator Encoder", GetLeftElevatorPosition());
     SmartDashboard.putNumber("Right Elevator Encoder", GetRightElevatorPosition());
+
+    SmartDashboard.putNumber("Elevator Output", LeftElevatorMotor.getAppliedOutput());
+    SmartDashboard.putNumber("Elevator PID + FF Output", ElevatorPID.calculate(GetLeftElevatorPosition(), 4) + ElevatorFF.calculate(1, 1));
   }
 
   public void MoveElevator(Supplier<Double> speed){
     LeftElevatorMotor.set(speed.get());
+  }
+
+  public void MoveElevatorToPosition(double position){
+    double PIDOutput = ElevatorPID.calculate(GetLeftElevatorPosition(), position) + ElevatorFF.calculate(position);
+    double CommandedOutput = Math.copySign(Math.min(Math.abs(PIDOutput), .2), PIDOutput);
+    LeftElevatorMotor.set(CommandedOutput);
+    // SmartDashboard.putNumber("Elevator Motor Output", ElevatorPID.calculate(GetLeftElevatorPosition(), position) + ElevatorFF.calculate(1, 1));
+  }
+
+  public void StopElevator(){
+    LeftElevatorMotor.set(0);
   }
 
   public double GetLeftElevatorPosition(){
