@@ -26,8 +26,7 @@ public class Wrist extends SubsystemBase {
   private final PIDController m_PIDController = new PIDController(.4, 0, 0);
   /** Creates a new Wrist. */
   public Wrist() {
-    WristMotorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-    WristMotor.getConfigurator().apply(WristMotorConfig);
+    WristMotor.setNeutralMode(NeutralModeValue.Brake);
   }
 
   @Override
