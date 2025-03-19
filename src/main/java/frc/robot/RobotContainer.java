@@ -27,11 +27,13 @@ import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
-import frc.robot.commands.RunElevator;
+import frc.robot.commands.Algae.RunAlgaeIntake;
+import frc.robot.commands.Elevator.RunElevator;
 import frc.robot.commands.Elevator.SetElevatorToPosition;
 import frc.robot.commands.Wrist.RunWrist;
 import frc.robot.commands.Wrist.SetWristToPosition;
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.AlgaeIntake;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Wrist;
@@ -75,6 +77,7 @@ public class RobotContainer {
 
     public static final Elevator elevator = new Elevator();
     public static final Wrist wrist = new Wrist();
+    public static final AlgaeIntake algaeIntake = new AlgaeIntake();
 
     public RobotContainer() {
         /* Put autonomous chooser on dashboard */
@@ -132,6 +135,8 @@ public class RobotContainer {
         //ELEVATOR
         elevator.setDefaultCommand(new RunElevator(() -> -Copilot.getRightY() * .5));
         Copilot.start().onTrue(new InstantCommand(() -> elevator.ResetEncoder()));
+
+        algaeIntake.setDefaultCommand(new RunAlgaeIntake(()-> Copilot.getLeftTriggerAxis()-Copilot.getRightTriggerAxis()));
 
         wrist.setDefaultCommand(new RunWrist(() -> Copilot.getLeftY()));
         Copilot.a().whileTrue(new SetWristToPosition(-6));
