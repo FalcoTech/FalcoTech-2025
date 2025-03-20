@@ -4,12 +4,19 @@
 
 package frc.robot.subsystems;
 
+import java.util.function.Supplier;
+
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.NeutralModeValue;
+
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class CoralIntake extends SubsystemBase {
   //talonFX motor with ID 42
+  private final TalonFX CoralIntakeMotor = new TalonFX(42);
   public CoralIntake() {
     //set to brake mode
+    CoralIntakeMotor.setNeutralMode(NeutralModeValue.Brake);
   }
 
   @Override
@@ -18,8 +25,12 @@ public class CoralIntake extends SubsystemBase {
   }
 
   //function to run coral intake
-
+  public void RunCoralIntake(Supplier<Double> speed){
+    CoralIntakeMotor.set(speed.get()*.5);
+  }
   //function to stop coral intake 
+  public void StopCoralIntake(){
+    CoralIntakeMotor.set(0);
+  }
 
-  
 }

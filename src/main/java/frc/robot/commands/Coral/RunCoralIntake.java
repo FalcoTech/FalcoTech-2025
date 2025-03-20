@@ -4,17 +4,24 @@
 
 package frc.robot.commands.Coral;
 
+import java.util.function.Supplier;
+
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.RobotContainer;
+import frc.robot.subsystems.CoralIntake;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class RunCoralIntake extends Command {
   //initialize Coral Intake subsystem from container
-  
+  private final CoralIntake m_CoralIntake = RobotContainer.coralIntake;
   //declare a variable for speed
-  public RunCoralIntake() {
+  private Supplier<Double> Speed;
+
+  public RunCoralIntake(Supplier<Double> speed) {
     // Use addRequirements() here to declare subsystem dependencies.
-    
+    addRequirements(m_CoralIntake);
     //set "global" speed using "this" keyword
+    this.Speed = speed;
   }
 
   // Called when the command is initially scheduled.
@@ -25,12 +32,15 @@ public class RunCoralIntake extends Command {
   @Override
   public void execute() {
     //set coral speed based on your "global" speed variable
+    m_CoralIntake.RunCoralIntake(Speed);
+
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
     //stop coral intake 
+    m_CoralIntake.StopCoralIntake();
   }
 
   // Returns true when the command should end.
