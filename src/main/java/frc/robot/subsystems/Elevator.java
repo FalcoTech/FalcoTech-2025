@@ -36,7 +36,7 @@ public class Elevator extends SubsystemBase {
   private final RelativeEncoder LeftElevatorEncoder = LeftElevatorMotor.getEncoder();
   private final RelativeEncoder RightElevatorEncoder = RightElevatorMotor.getEncoder();
   
-  private final PIDController ElevatorPID = new PIDController(.175, 0, 0); //kP = .1
+  private final PIDController ElevatorPID = new PIDController(.2, 0, 0); //kP = .1
   private final ElevatorFeedforward ElevatorFF = new ElevatorFeedforward(0, .06, 0, 0); //kG = .1
   /** Creates a new Elevator. */
   public Elevator() {

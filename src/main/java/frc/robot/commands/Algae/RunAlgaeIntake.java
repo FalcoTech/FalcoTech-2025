@@ -13,13 +13,10 @@ import frc.robot.subsystems.AlgaeIntake;
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class RunAlgaeIntake extends Command {
   private final AlgaeIntake m_AlgaeIntake = RobotContainer.algaeIntake;
-
-  private Supplier<Double> Speed;
   /** Creates a new RunAlgaeIntake. */
-  public RunAlgaeIntake(Supplier<Double> speed) {
+  public RunAlgaeIntake() {
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(m_AlgaeIntake);
-    this.Speed = speed;
   }
 
   // Called when the command is initially scheduled.
@@ -29,7 +26,8 @@ public class RunAlgaeIntake extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    m_AlgaeIntake.Runintake(Speed);
+    double Speed = (RobotContainer.Copilot.leftBumper().getAsBoolean() ? .6 : 0) - (RobotContainer.Copilot.rightBumper().getAsBoolean() ? .6 : 0);
+    m_AlgaeIntake.RunAlgaeIntake(Speed);
   }
 
   // Called once the command ends or is interrupted.

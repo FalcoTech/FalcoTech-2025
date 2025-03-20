@@ -25,9 +25,9 @@ public class AlgaeIntake extends SubsystemBase {
     
     // This method will be called once per scheduler run
   }
-  public void Runintake(Supplier<Double> speed){
-      leftAlgaeIntake.set(VictorSPXControlMode.PercentOutput, speed.get() * .6);
-      RightAlgaeIntake.set(VictorSPXControlMode.PercentOutput, speed.get()* .6);
+  public void RunAlgaeIntake(double speed){
+      leftAlgaeIntake.set(VictorSPXControlMode.PercentOutput, speed * .6);
+      RightAlgaeIntake.set(VictorSPXControlMode.PercentOutput, speed * .6);
   }
 
   public void StopIntake(){

@@ -28,6 +28,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.commands.Algae.RunAlgaeIntake;
+import frc.robot.commands.Coral.RunCoralIntake;
 import frc.robot.commands.Elevator.RunElevator;
 import frc.robot.commands.Elevator.SetElevatorToPosition;
 import frc.robot.commands.Wrist.RunWrist;
@@ -35,14 +36,15 @@ import frc.robot.commands.Wrist.SetWristToPosition;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.AlgaeIntake;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.subsystems.CoralIntake;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Wrist;
 
 public class RobotContainer {
     /* Initialize Game Controllers */
     // private final CommandPS4Controller joystick = new CommandPS4Controller(0);
-    private final CommandXboxController pilot = new CommandXboxController(0);
-    private final CommandXboxController Copilot = new CommandXboxController(1);
+    public static final CommandXboxController pilot = new CommandXboxController(0);
+    public static final CommandXboxController Copilot = new CommandXboxController(1);
 
     /* Set max speeds */
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);// kSpeedAt12Volts desired top speed
@@ -78,6 +80,7 @@ public class RobotContainer {
     public static final Elevator elevator = new Elevator();
     public static final Wrist wrist = new Wrist();
     public static final AlgaeIntake algaeIntake = new AlgaeIntake();
+    public static final CoralIntake coralIntake = new CoralIntake();
 
     public RobotContainer() {
         /* Put autonomous chooser on dashboard */
@@ -96,9 +99,9 @@ public class RobotContainer {
         drivetrain.setDefaultCommand(
             // Drivetrain will execute this command periodically
             drivetrain.applyRequest(() ->
-                drive.withVelocityX(-pilot.getLeftY()) // Drive forward with negative Y (forward)
-                    .withVelocityY(-pilot.getLeftX()) // Drive left with negative X (left)
-                    .withRotationalRate(-pilot.getRightX()) // Drive counterclockwise with negative X (left)
+                drive.withVelocityX(-pilot.getLeftY() * (pilot.leftBumper().getAsBoolean() ? .3 : 1)) // Drive forward with negative Y (forward)
+                    .withVelocityY(-pilot.getLeftX() * (pilot.leftBumper().getAsBoolean() ? .3 : 1)) // Drive left with negative X (left)
+                    .withRotationalRate(-pilot.getRightX() * (pilot.leftBumper().getAsBoolean() ? .3 : 1)) // Drive counterclockwise with negative X (left)
             )
         );
 
@@ -135,12 +138,18 @@ public class RobotContainer {
         //ELEVATOR
         elevator.setDefaultCommand(new RunElevator(() -> -Copilot.getRightY() * .5));
         Copilot.start().onTrue(new InstantCommand(() -> elevator.ResetEncoder()));
+        Copilot.b().onTrue(new SetElevatorToPosition(6.15));
 
-        algaeIntake.setDefaultCommand(new RunAlgaeIntake(()-> Copilot.getLeftTriggerAxis()-Copilot.getRightTriggerAxis()));
+        //ALGAE INTAKE
+        algaeIntake.setDefaultCommand(new RunAlgaeIntake());
 
+        //CORAL INTAKE
+        coralIntake.setDefaultCommand(new RunCoralIntake(()-> Copilot.getLeftTriggerAxis()-Copilot.getRightTriggerAxis()));
+
+        //WRIST
         wrist.setDefaultCommand(new RunWrist(() -> Copilot.getLeftY()));
         Copilot.a().whileTrue(new SetWristToPosition(-6));
-        Copilot.b().whileTrue(new SetElevatorToPosition(3));
+        
     }
 
     public Command getAutonomousCommand() {

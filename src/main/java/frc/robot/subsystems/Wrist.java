@@ -23,7 +23,7 @@ public class Wrist extends SubsystemBase {
   private final TalonFX WristMotor = new TalonFX(30);
   private TalonFXConfiguration WristMotorConfig = new TalonFXConfiguration();
 
-  private final PIDController m_PIDController = new PIDController(.4, 0, 0);
+  private final PIDController m_PIDController = new PIDController(.35, 0, 0);
   /** Creates a new Wrist. */
   public Wrist() {
     WristMotor.setNeutralMode(NeutralModeValue.Brake);
