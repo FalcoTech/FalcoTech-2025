@@ -8,6 +8,7 @@ import java.util.function.Supplier;
 
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.configs.TalonFXConfigurator;
 import com.ctre.phoenix6.controls.ControlRequest;
 import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.PositionVoltage;
@@ -22,10 +23,12 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class Wrist extends SubsystemBase {
   private final TalonFX WristMotor = new TalonFX(30);
   private TalonFXConfiguration WristMotorConfig = new TalonFXConfiguration();
+  private TalonFXConfigurator WristMotorConfigurator = WristMotor.getConfigurator();
 
   private final PIDController m_PIDController = new PIDController(.35, 0, 0);
   /** Creates a new Wrist. */
   public Wrist() {
+    WristMotorConfigurator.apply(WristMotorConfig);
     WristMotor.setNeutralMode(NeutralModeValue.Brake);
   }
 
@@ -54,5 +57,9 @@ public class Wrist extends SubsystemBase {
 
   public double GetWristEncoderPosition(){
     return WristMotor.getPosition().getValueAsDouble();
+  }
+
+  public void ResetWristEncoder(){
+    WristMotor.setPosition(0);
   }
 }
