@@ -15,8 +15,10 @@ import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.revrobotics.AbsoluteEncoder;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -25,6 +27,8 @@ public class Wrist extends SubsystemBase {
   private final TalonFX WristMotor = new TalonFX(30);
   private TalonFXConfiguration WristMotorConfig = new TalonFXConfiguration();
   private TalonFXConfigurator WristMotorConfigurator = WristMotor.getConfigurator();
+
+  private final Encoder WristEncoder = new Encoder(1, 2);
 
   private final PIDController m_PIDController = new PIDController(.35, 0, 0);
   /** Creates a new Wrist. */

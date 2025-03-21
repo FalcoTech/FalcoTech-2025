@@ -4,19 +4,19 @@
 
 package frc.robot.commands.Algae;
 
-import java.util.function.Supplier;
-
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.AlgaeIntake;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
-public class RunAlgaeIntake extends Command {
+public class SetAlgaeIntakeSpeed extends Command {
+  private double Speed;
   private final AlgaeIntake m_AlgaeIntake = RobotContainer.algaeIntake;
-  /** Creates a new RunAlgaeIntake. */
-  public RunAlgaeIntake() {
+  /** Creates a new SetAlgaeIntakeSpeed. */
+  public SetAlgaeIntakeSpeed(double speed) {
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(m_AlgaeIntake);
+    this.Speed = speed;
   }
 
   // Called when the command is initially scheduled.
@@ -26,14 +26,13 @@ public class RunAlgaeIntake extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    double Speed = (RobotContainer.Copilot.leftBumper().getAsBoolean() ? .6 : 0) - (RobotContainer.Copilot.rightBumper().getAsBoolean() ? .6 : 0);
     m_AlgaeIntake.RunAlgaeIntake(Speed);
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    m_AlgaeIntake.StopAlgaeIntake ();
+    m_AlgaeIntake.StopAlgaeIntake();
   }
 
   // Returns true when the command should end.

@@ -24,6 +24,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -44,7 +46,6 @@ import frc.robot.subsystems.Wrist;
 
 public class RobotContainer {
     /* Initialize Game Controllers */
-    // private final CommandPS4Controller joystick = new CommandPS4Controller(0);
     public static final CommandXboxController pilot = new CommandXboxController(0);
     public static final CommandXboxController Copilot = new CommandXboxController(1);
 
@@ -67,8 +68,6 @@ public class RobotContainer {
 
     private final Telemetry logger = new Telemetry(MaxSpeed);
 
-    public static final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
-
     //PATHFINDING TEST
     private final Pose2d leftFeederTargetPose = new Pose2d(1.14, 6.93, Rotation2d.fromDegrees(127.16));
     private final Pose2d algaeScoreTargerPose = new Pose2d(5.98, .58, Rotation2d.fromDegrees(-90));
@@ -76,9 +75,11 @@ public class RobotContainer {
     private final PathConstraints pathFindConstraints = new PathConstraints(MaxSpeed, 4, MaxAngularRate, Units.degreesToRadians(540));
     private final Command leftFeederPathfind = AutoBuilder.pathfindToPose(leftFeederTargetPose, pathFindConstraints, 1);
     private final Command algaeScoreCommand = AutoBuilder.pathfindToPose(algaeScoreTargerPose, pathFindConstraints, 1);
-    /* Path follower */
+    
     private final SendableChooser<Command> autoChooser;
 
+    //Initialize subsystems
+    public static final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
     public static final Elevator elevator = new Elevator();
     public static final Wrist wrist = new Wrist();
     public static final AlgaeIntake algaeIntake = new AlgaeIntake();
@@ -89,9 +90,8 @@ public class RobotContainer {
         autoChooser = AutoBuilder.buildAutoChooser("Tests");
         SmartDashboard.putData("Auto Mode", autoChooser);
 
-        /* Pathplanner named commands for the pathplanner app. TODO: make this a function */
-        NamedCommands.registerCommand("TestCommand", algaeScoreCommand);
         configureBindings();
+        RegisterNamedCommands();
     }
 
     private void configureBindings() {
@@ -100,41 +100,27 @@ public class RobotContainer {
         // and Y is defined as to the left according to WPILib convention.
         drivetrain.setDefaultCommand(new TeleOpDrive());
 
-        // pilot.rightBumper().whileTrue(
-        //     new InstantCommand(() -> 
-        //         drivetrain.setControl(
-        //             driveRobotCentric.withVelocityX(0)
-        //                 .withVelocityY(0)
-        //                 .withRotationalRate(0)
-        //         )
-        //     )
-        // );
+        // reset the field-centric heading on start button press
+        pilot.start().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
         
+        drivetrain.registerTelemetry(logger::telemeterize);
+          
         // pilot.a().whileTrue(leftFeederPathfind);
         // pilot.b().whileTrue(algaeScoreCommand);
-
-        // reset the field-centric heading on left bumper press
-        pilot.start().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
-
-        pilot.back().and(pilot.y()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
-        pilot.back().and(pilot.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
-        pilot.start().and(pilot.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
-        pilot.start().and(pilot.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
-
-        drivetrain.registerTelemetry(logger::telemeterize);
+        // pilot.back().and(pilot.y()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward)); // pilot.back().and(pilot.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse)); // pilot.start().and(pilot.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward)); // pilot.start().and(pilot.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
 
         //TODO
-        // Add CoralIntake, AlgaeIntake, Claw
         // 1 Rotation at top of elevator = 5.5 in of linear movement or 11.03 in of movement at claw
         // Max travel is 29in 
-        
-
 
         //ELEVATOR
-        elevator.setDefaultCommand(new RunElevator(() -> -Copilot.getRightY() * .5));
+        elevator.setDefaultCommand(new RunElevator(() -> Math.abs(Copilot.getRightY() * .5)));
         Copilot.start().onTrue(new InstantCommand(() -> elevator.ResetElevatorEncoders()));
-        Copilot.b().onTrue(new SetElevatorToPosition(6.15));
+        Copilot.b().onTrue(new SetElevatorToPosition(6.3));
+        Copilot.x().onTrue(new SetElevatorToPosition(14));
 
+        Copilot.povLeft().onTrue(new SetElevatorToPosition(12));
+        
         //ALGAE INTAKE
         algaeIntake.setDefaultCommand(new RunAlgaeIntake());
 
@@ -143,12 +129,24 @@ public class RobotContainer {
 
         //WRIST
         wrist.setDefaultCommand(new RunWrist(() -> Copilot.getLeftY()));
-        Copilot.a().whileTrue(new SetWristToPosition(-6));
+        Copilot.a().whileTrue(new SetWristToPosition(3.3));
         
+        // Copilot.povUp().onTrue(new SequentialCommandGroup(
+            // new SetElevatorToPosition(14),
+            // new ParallelCommandGroup(
+                // new SetElevatorToPosition(14),
+                // new SetWristToPosition(3.3) 
+            // )
+        // ));
     }
 
     public Command getAutonomousCommand() {
         /* Run the path selected from the auto chooser */
         return autoChooser.getSelected();
+    }
+
+    private void RegisterNamedCommands(){
+        /* Pathplanner named commands for the pathplanner app. TODO: make this a function */
+        NamedCommands.registerCommand("TestCommand", algaeScoreCommand);
     }
 }

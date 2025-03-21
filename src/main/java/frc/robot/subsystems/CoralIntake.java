@@ -26,7 +26,7 @@ public class CoralIntake extends SubsystemBase {
 
   //function to run coral intake
   public void RunCoralIntake(Supplier<Double> speed){
-    CoralIntakeMotor.set(speed.get()*.5);
+    CoralIntakeMotor.set(speed.get()*.8);
   }
   //function to stop coral intake 
   public void StopCoralIntake(){

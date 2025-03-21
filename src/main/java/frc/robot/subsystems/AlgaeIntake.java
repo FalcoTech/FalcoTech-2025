@@ -30,7 +30,7 @@ public class AlgaeIntake extends SubsystemBase {
       RightAlgaeIntake.set(VictorSPXControlMode.PercentOutput, speed * .8);
   }
 
-  public void StopIntake(){
+  public void StopAlgaeIntake(){
      leftAlgaeIntake.set(VictorSPXControlMode.PercentOutput, 0);
       RightAlgaeIntake.set(VictorSPXControlMode.PercentOutput, 0);
   }
