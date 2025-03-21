@@ -7,6 +7,7 @@ package frc.robot;
 import static edu.wpi.first.units.Units.*;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
+import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveModule.SteerRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -31,6 +32,7 @@ import frc.robot.commands.Algae.RunAlgaeIntake;
 import frc.robot.commands.Coral.RunCoralIntake;
 import frc.robot.commands.Elevator.RunElevator;
 import frc.robot.commands.Elevator.SetElevatorToPosition;
+import frc.robot.commands.Swerve.TeleOpDrive;
 import frc.robot.commands.Wrist.RunWrist;
 import frc.robot.commands.Wrist.SetWristToPosition;
 import frc.robot.generated.TunerConstants;
@@ -47,14 +49,14 @@ public class RobotContainer {
     public static final CommandXboxController Copilot = new CommandXboxController(1);
 
     /* Set max speeds */
-    private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);// kSpeedAt12Volts desired top speed
-    private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
+    public static double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);// kSpeedAt12Volts desired top speed
+    public static double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
     /* Setting up control commands of the swerve drive */
-    private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
+    public static final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
             .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
             .withDriveRequestType(DriveRequestType.Velocity); // Use open-loop control for drive motors
 
-    private final SwerveRequest.RobotCentric driveRobotCentric = new SwerveRequest.RobotCentric()
+    public static final SwerveRequest.RobotCentric driveRobotCentric = new SwerveRequest.RobotCentric()
             .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1)
             .withDriveRequestType(DriveRequestType.Velocity);
             
@@ -65,7 +67,7 @@ public class RobotContainer {
 
     private final Telemetry logger = new Telemetry(MaxSpeed);
 
-    public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
+    public static final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
     //PATHFINDING TEST
     private final Pose2d leftFeederTargetPose = new Pose2d(1.14, 6.93, Rotation2d.fromDegrees(127.16));
@@ -96,14 +98,7 @@ public class RobotContainer {
         /* Swerve Drive */
         // Note that X is defined as forward according to WPILib convention,
         // and Y is defined as to the left according to WPILib convention.
-        drivetrain.setDefaultCommand(
-            // Drivetrain will execute this command periodically
-            drivetrain.applyRequest(() ->
-                drive.withVelocityX(-pilot.getLeftY() * (pilot.leftBumper().getAsBoolean() ? .3 : 1)) // Drive forward with negative Y (forward)
-                    .withVelocityY(-pilot.getLeftX() * (pilot.leftBumper().getAsBoolean() ? .3 : 1)) // Drive left with negative X (left)
-                    .withRotationalRate(-pilot.getRightX() * (pilot.leftBumper().getAsBoolean() ? .3 : 1)) // Drive counterclockwise with negative X (left)
-            )
-        );
+        drivetrain.setDefaultCommand(new TeleOpDrive());
 
         // pilot.rightBumper().whileTrue(
         //     new InstantCommand(() -> 
@@ -137,7 +132,7 @@ public class RobotContainer {
 
         //ELEVATOR
         elevator.setDefaultCommand(new RunElevator(() -> -Copilot.getRightY() * .5));
-        Copilot.start().onTrue(new InstantCommand(() -> elevator.ResetEncoder()));
+        Copilot.start().onTrue(new InstantCommand(() -> elevator.ResetElevatorEncoders()));
         Copilot.b().onTrue(new SetElevatorToPosition(6.15));
 
         //ALGAE INTAKE

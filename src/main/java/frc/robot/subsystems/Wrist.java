@@ -18,6 +18,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Wrist extends SubsystemBase {
@@ -30,6 +31,8 @@ public class Wrist extends SubsystemBase {
   public Wrist() {
     WristMotorConfigurator.apply(WristMotorConfig);
     WristMotor.setNeutralMode(NeutralModeValue.Brake);
+
+    SmartDashboard.putData("Reset Wrist Encoder", new InstantCommand(() -> ResetWristEncoder()).ignoringDisable(true));
   }
 
   @Override
@@ -37,6 +40,7 @@ public class Wrist extends SubsystemBase {
     // This method will be called once per scheduler run
     // SmartDashboard.putNumber("Wrist Motor Output", WristMotor.getDutyCycle().getValueAsDouble());
     SmartDashboard.putNumber("Wrist Encoder Value", GetWristEncoderPosition());
+
     // WristSlot0Config.kP = SmartDashboard.getNumber("WRIST KP", 0);
     // SmartDashboard.putNumber("where is it going", WristMotor.getClosedLoopReference().getValueAsDouble());
   }

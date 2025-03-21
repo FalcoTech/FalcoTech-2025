@@ -24,6 +24,7 @@ import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Elevator extends SubsystemBase {
@@ -52,6 +53,8 @@ public class Elevator extends SubsystemBase {
     RightElevatorMotor.configure(RightElevatorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
 
     LeftElevatorEncoder.setPosition(0);
+
+    SmartDashboard.putData("Reset Elevator Encoder", new InstantCommand(() -> ResetElevatorEncoders()).ignoringDisable(true));
   }
 
   @Override
@@ -59,9 +62,6 @@ public class Elevator extends SubsystemBase {
     // This method will be called once per scheduler run
     SmartDashboard.putNumber("Left Elevator Encoder", GetLeftElevatorPosition());
     SmartDashboard.putNumber("Right Elevator Encoder", GetRightElevatorPosition());
-
-    SmartDashboard.putNumber("Elevator Output", LeftElevatorMotor.getAppliedOutput());
-    SmartDashboard.putNumber("Elevator PID + FF Output", ElevatorPID.calculate(GetLeftElevatorPosition(), 4) + ElevatorFF.calculate(1, 1));
   }
 
   public void MoveElevator(Supplier<Double> speed){
@@ -85,7 +85,7 @@ public class Elevator extends SubsystemBase {
   public double GetRightElevatorPosition(){
     return RightElevatorEncoder.getPosition();
   }
-  public void ResetEncoder(){
+  public void ResetElevatorEncoders(){
     LeftElevatorEncoder.setPosition(0);
     RightElevatorEncoder.setPosition(0);
   }
