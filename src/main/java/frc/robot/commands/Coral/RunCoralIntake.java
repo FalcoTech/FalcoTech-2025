@@ -33,7 +33,6 @@ public class RunCoralIntake extends Command {
   public void execute() {
     //set coral speed based on your "global" speed variable
     m_CoralIntake.RunCoralIntake(Speed);
-
   }
 
   // Called once the command ends or is interrupted.

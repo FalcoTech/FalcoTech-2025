@@ -39,6 +39,6 @@ public class SetWristToPosition extends Command {
   @Override
   public boolean isFinished() {
     // return m_wrist.GetWristEncoderPosition() == position;
-    return false;
+    return (position == 0 ? m_wrist.GetWristEncoderPosition() < .05 : false);
   }
 }

@@ -25,6 +25,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -33,6 +34,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.commands.Algae.RunAlgaeIntake;
 import frc.robot.commands.Coral.RunCoralIntake;
 import frc.robot.commands.Elevator.RunElevator;
+import frc.robot.commands.Elevator.SequentialElevatorSetpoint;
 import frc.robot.commands.Elevator.SetElevatorToPosition;
 import frc.robot.commands.Swerve.TeleOpDrive;
 import frc.robot.commands.Wrist.RunWrist;
@@ -122,7 +124,8 @@ public class RobotContainer {
         Copilot.povLeft().onTrue(new SetElevatorToPosition(12));
         
         //ALGAE INTAKE
-        algaeIntake.setDefaultCommand(new RunAlgaeIntake());
+        Copilot.leftBumper().whileTrue(new RunAlgaeIntake(() -> .8));
+        Copilot.rightBumper().whileTrue(new RunAlgaeIntake(() -> -.8));
 
         //CORAL INTAKE
         coralIntake.setDefaultCommand(new RunCoralIntake(()-> Copilot.getLeftTriggerAxis()-Copilot.getRightTriggerAxis()));
@@ -132,12 +135,13 @@ public class RobotContainer {
         Copilot.a().whileTrue(new SetWristToPosition(3.3));
         
         // Copilot.povUp().onTrue(new SequentialCommandGroup(
-            // new SetElevatorToPosition(14),
-            // new ParallelCommandGroup(
-                // new SetElevatorToPosition(14),
-                // new SetWristToPosition(3.3) 
-            // )
+        //     new SequentialElevatorSetpoint(14),
+        //     new ParallelRaceGroup(
+        //         new SetElevatorToPosition(14),
+        //         new SetWristToPosition(3.3) 
+        //     )
         // ));
+        Copilot.povUp().onTrue(new SequentialElevatorSetpoint(3));
     }
 
     public Command getAutonomousCommand() {

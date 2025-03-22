@@ -18,6 +18,8 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.revrobotics.AbsoluteEncoder;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.wpilibj.DutyCycle;
+import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -28,15 +30,18 @@ public class Wrist extends SubsystemBase {
   private TalonFXConfiguration WristMotorConfig = new TalonFXConfiguration();
   private TalonFXConfigurator WristMotorConfigurator = WristMotor.getConfigurator();
 
-  private final Encoder WristEncoder = new Encoder(1, 2);
+  private final DutyCycleEncoder WristEncoder = new DutyCycleEncoder(0, 40, 0);
 
-  private final PIDController m_PIDController = new PIDController(.35, 0, 0);
+  private final PIDController m_PIDController = new PIDController(.11, 0, 0);
   /** Creates a new Wrist. */
   public Wrist() {
     WristMotorConfigurator.apply(WristMotorConfig);
     WristMotor.setNeutralMode(NeutralModeValue.Brake);
 
     SmartDashboard.putData("Reset Wrist Encoder", new InstantCommand(() -> ResetWristEncoder()).ignoringDisable(true));
+    // SmartDashboard.putBoolean("Wrist Connected?", WristEncoder.isConnected());
+
+    WristEncoder.setInverted(true);
   }
 
   @Override
@@ -44,9 +49,7 @@ public class Wrist extends SubsystemBase {
     // This method will be called once per scheduler run
     // SmartDashboard.putNumber("Wrist Motor Output", WristMotor.getDutyCycle().getValueAsDouble());
     SmartDashboard.putNumber("Wrist Encoder Value", GetWristEncoderPosition());
-
-    // WristSlot0Config.kP = SmartDashboard.getNumber("WRIST KP", 0);
-    // SmartDashboard.putNumber("where is it going", WristMotor.getClosedLoopReference().getValueAsDouble());
+    SmartDashboard.putBoolean("Wrist Encoder Connected?", WristEncoder.isConnected());
   }
   
   public void MoveWrist(Supplier<Double> speed){
@@ -64,10 +67,11 @@ public class Wrist extends SubsystemBase {
   }
 
   public double GetWristEncoderPosition(){
-    return WristMotor.getPosition().getValueAsDouble();
+    // return WristMotor.getPosition().getValueAsDouble();
+    return WristEncoder.get() - .94;
   }
 
   public void ResetWristEncoder(){
-    WristMotor.setPosition(0);
+    // WristMotor.setPosition(0);
   }
 }
