@@ -4,6 +4,11 @@
 
 package frc.robot.subsystems;
 
+import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.InchesPerSecond;
+import static edu.wpi.first.units.Units.Volts;
+import static edu.wpi.first.units.Measure.*;
+
 import java.util.function.Supplier;
 
 import com.revrobotics.RelativeEncoder;
@@ -18,6 +23,15 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.units.DistanceUnit;
+import edu.wpi.first.units.Measure;
+import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.MutDistance;
+import edu.wpi.first.units.measure.MutLinearVelocity;
+import edu.wpi.first.units.measure.MutVelocity;
+import edu.wpi.first.units.measure.MutVoltage;
+import edu.wpi.first.units.measure.Velocity;
+import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -42,28 +56,26 @@ public class Elevator extends SubsystemBase {
   private SparkClosedLoopController ElevatorClosedLoopController = LeftElevatorMotor.getClosedLoopController();
   public double currentElevatorTarget = 0; // TODO: Set height to home position
 
-  // SysId objects
-  private final SysIdRoutine sysIdRoutine = new SysIdRoutine(
-    new SysIdRoutine.Config(),
-    new SysIdRoutine.Mechanism(
-      // Apply voltage to motors
-      this::setVoltage,
-      // Log data
-      log -> {
-        log.motor("elevator-left")
-          .voltage(appliedVolts)
-          .position(GetLeftElevatorPosition())
-          .velocity(GetLeftElevatorVelocity());
-        log.motor("elevator-right")
-          .voltage(appliedVolts)
-          .position(GetRightElevatorPosition())
-          .velocity(GetRightElevatorVelocity());
-      },
-      this
-    )
-  );
+  // private MutVoltage appliedVolts = Volts.mutable(0);
+  // private Distance measu_pos = Inches.mutable(0);
+  // private MutLinearVelocity measu_vel = InchesPerSecond.mutable(0);
+  // // SysId objects
+  // private final SysIdRoutine sysIdRoutine = new SysIdRoutine(
+  //   new SysIdRoutine.Config(),
+  //   new SysIdRoutine.Mechanism(
+  //     // Apply voltage to motors
+  //     (appliedVolts) -> LeftElevatorMotor.setVoltage(appliedVolts),
+  //     // Log data
+  //     log -> {
+  //       log.motor("elevator-left")
+  //         .voltage(appliedVolts)
+  //         .linearPosition(GetLeftElevatorDistance())
+  //         .linearVelocity(GetLeftElevatorVelocity());
+  //     },
+  //     this
+  //   )
+  // );
 
-  private double appliedVolts = 0.0;
 
   /** Creates a new Elevator. */
   public Elevator() {
@@ -134,6 +146,10 @@ public class Elevator extends SubsystemBase {
   public double GetLeftElevatorPosition(){
     return LeftElevatorEncoder.getPosition();
   }
+  public Distance GetLeftElevatorDistance(){
+    // convert position from encoder to mutDistance
+    return Inches.mutable(LeftElevatorEncoder.getPosition());
+  }
   public double GetRightElevatorPosition(){
     return RightElevatorEncoder.getPosition();
   }
@@ -145,40 +161,40 @@ public class Elevator extends SubsystemBase {
     currentElevatorTarget = targetHeight;
   }
 
-  /**
-   * Sets the voltage to both elevator motors.
-   * Used for SysId testing.
-   * @param volts The voltage to set
-   */
-  public void setVoltage(double volts) {
-    appliedVolts = volts;
-    LeftElevatorMotor.setVoltage(volts);
-    // Right motor follows left with inversion, so we don't need to set it directly
-  }
+  // /**
+  //  * Sets the voltage to both elevator motors.
+  //  * Used for SysId testing.
+  //  * @param volts The voltage to set
+  //  */
+  // public void setVoltage(double volts) {
+  //   appliedVolts = Measure.of(volts, Units.Volts);
+  //   LeftElevatorMotor.setVoltage(volts);
+  //   // Right motor follows left with inversion, so we don't need to set it directly
+  // }
 
-  /**
-   * Gets the velocity of the left elevator motor.
-   * @return Velocity in inches per second
-   */
-  public double GetLeftElevatorVelocity() {
-    return LeftElevatorEncoder.getVelocity() / 60.0; // Convert RPM to RPS (and then in/s due to conversion factor)
-  }
+  // /**
+  //  * Gets the velocity of the left elevator motor.
+  //  * @return Velocity in inches per second
+  //  */
+  // public LinearVelocity GetLeftElevatorVelocity() {
+  //   return LeftElevatorEncoder.getVelocity() / 60.0; // Convert RPM to RPS (and then in/s due to conversion factor)
+  // }
 
-  /**
-   * Command to run a SysId quasistatic test (gradually ramping voltage)
-   * @param direction Direction of the test (true = forward, false = backward)
-   * @return The SysId quasistatic test command
-   */
-  public Command sysIdQuasistatic(boolean direction) {
-    return sysIdRoutine.quasistatic(direction ? SysIdRoutine.Direction.kForward : SysIdRoutine.Direction.kReverse);
-  }
+  // /**
+  //  * Command to run a SysId quasistatic test (gradually ramping voltage)
+  //  * @param direction Direction of the test (true = forward, false = backward)
+  //  * @return The SysId quasistatic test command
+  //  */
+  // public Command sysIdQuasistatic(boolean direction) {
+  //   return sysIdRoutine.quasistatic(direction ? SysIdRoutine.Direction.kForward : SysIdRoutine.Direction.kReverse);
+  // }
 
-  /**
-   * Command to run a SysId dynamic test (applying constant voltage)
-   * @param direction Direction of the test (true = forward, false = backward)
-   * @return The SysId dynamic test command
-   */
-  public Command sysIdDynamic(boolean direction) {
-    return sysIdRoutine.dynamic(direction ? SysIdRoutine.Direction.kForward : SysIdRoutine.Direction.kReverse);
-  }
+  // /**
+  //  * Command to run a SysId dynamic test (applying constant voltage)
+  //  * @param direction Direction of the test (true = forward, false = backward)
+  //  * @return The SysId dynamic test command
+  //  */
+  // public Command sysIdDynamic(boolean direction) {
+  //   return sysIdRoutine.dynamic(direction ? SysIdRoutine.Direction.kForward : SysIdRoutine.Direction.kReverse);
+  // }
 }
