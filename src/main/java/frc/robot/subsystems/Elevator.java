@@ -6,13 +6,8 @@ package frc.robot.subsystems;
 
 import java.util.function.Supplier;
 
-import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.configs.TalonFXConfigurator;
-import com.ctre.phoenix6.controls.Follower;
-import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.signals.InvertedValue;
-import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.revrobotics.RelativeEncoder;
+import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
@@ -39,6 +34,10 @@ public class Elevator extends SubsystemBase {
   
   private final PIDController ElevatorPID = new PIDController(.2, 0, 0); //kP = .1
   private final ElevatorFeedforward ElevatorFF = new ElevatorFeedforward(0, .06, 0, 0); //kG = .1
+
+  private SparkClosedLoopController ElevatorClosedLoopController = LeftElevatorMotor.getClosedLoopController();
+  private double currentElevatorTarget = 0; // TODO: Set height to home position
+
   /** Creates a new Elevator. */
   public Elevator() {
     // LeftElevatorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
@@ -48,11 +47,16 @@ public class Elevator extends SubsystemBase {
 
     RightElevatorConfig.follow(20, true);
 
-    // RightElevatorConfig.follow(LeftElevatorMotor, true);    
+    LeftElevatorConfig.encoder.positionConversionFactor(11.03); // Converts 1 rotatoin of the encoder to 11.03 inches of elevator height
+    LeftElevatorConfig.closedLoop.maxMotion
+      .maxVelocity(1) // TODO: Set to max velocity of elevator
+      .maxAcceleration(10) //TODO: Set max accel of elevator
+      .allowedClosedLoopError(1); //TODO: Set to allowed tolerance of elevator
+   
     LeftElevatorMotor.configure(LeftElevatorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     RightElevatorMotor.configure(RightElevatorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
 
-    LeftElevatorEncoder.setPosition(0);
+    ResetElevatorEncoders();  
 
     SmartDashboard.putData("Reset Elevator Encoder", new InstantCommand(() -> ResetElevatorEncoders()).ignoringDisable(true));
   }
@@ -62,11 +66,23 @@ public class Elevator extends SubsystemBase {
     // This method will be called once per scheduler run
     SmartDashboard.putNumber("Left Elevator Encoder", GetLeftElevatorPosition());
     SmartDashboard.putNumber("Right Elevator Encoder", GetRightElevatorPosition());
+
+    // Smart Dashboard button to toggle holding at the setpoint using the MoveElevatorToMaxMotion method
+    if (SmartDashboard.getBoolean("Hold Elevator Position", false)) {
+      MoveElevatorToPositionMaxMotion(currentElevatorTarget);
+    }
+    SmartDashboard.putNumber("Elevator Target", currentElevatorTarget);
+
+
   }
 
   public void MoveElevator(Supplier<Double> speed){
     LeftElevatorMotor.set(speed.get());
   }
+
+  public void MoveElevatorToPositionMaxMotion(double position){
+    elevatorCurrentTarget = position;
+    ElevatorClosedLoopController.setReference(elevatorCurrentTarget, SparkClosedLoopController.kControlType_Position.MaxMotion);
 
   public void MoveElevatorToPosition(double position){
     double PIDOutput = ElevatorPID.calculate(GetLeftElevatorPosition(), position) + ElevatorFF.calculate(position);
