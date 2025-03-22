@@ -32,6 +32,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.commands.Algae.RunAlgaeIntake;
+import frc.robot.commands.Coral.CenterCoral;
 import frc.robot.commands.Coral.RunCoralIntake;
 import frc.robot.commands.Elevator.RunElevator;
 import frc.robot.commands.Elevator.SequentialElevatorSetpoint;
@@ -129,6 +130,7 @@ public class RobotContainer {
 
         //CORAL INTAKE
         coralIntake.setDefaultCommand(new RunCoralIntake(()-> Copilot.getLeftTriggerAxis()-Copilot.getRightTriggerAxis()));
+        Copilot.povRight().whileTrue(new CenterCoral());
 
         //WRIST
         wrist.setDefaultCommand(new RunWrist(() -> Copilot.getLeftY()));
@@ -141,6 +143,7 @@ public class RobotContainer {
         //         new SetWristToPosition(3.3) 
         //     )
         // ));
+        //TODO: Setup SetPoints as smartdashboard stuff
         Copilot.povUp().onTrue(new SequentialElevatorSetpoint(3));
     }
 

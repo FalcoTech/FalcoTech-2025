@@ -24,6 +24,14 @@ public class CoralIntake extends SubsystemBase {
     // This method will be called once per scheduler run
   }
 
+  public void setCoralIntakePosition(double rotations){
+    CoralIntakeMotor.setPosition(rotations);
+  }
+
+  public double GetCoralIntakePosition(){
+    return CoralIntakeMotor.getPosition().getValueAsDouble();
+  }
+
   //function to run coral intake
   public void RunCoralIntake(Supplier<Double> speed){
     CoralIntakeMotor.set(speed.get()*.8);
