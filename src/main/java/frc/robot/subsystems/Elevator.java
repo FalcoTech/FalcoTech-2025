@@ -9,6 +9,7 @@ import java.util.function.Supplier;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
@@ -17,10 +18,13 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
 public class Elevator extends SubsystemBase {
   private final SparkMax LeftElevatorMotor = new SparkMax(20, MotorType.kBrushless);
@@ -36,7 +40,30 @@ public class Elevator extends SubsystemBase {
   private final ElevatorFeedforward ElevatorFF = new ElevatorFeedforward(0, .06, 0, 0); //kG = .1
 
   private SparkClosedLoopController ElevatorClosedLoopController = LeftElevatorMotor.getClosedLoopController();
-  private double currentElevatorTarget = 0; // TODO: Set height to home position
+  public double currentElevatorTarget = 0; // TODO: Set height to home position
+
+  // SysId objects
+  private final SysIdRoutine sysIdRoutine = new SysIdRoutine(
+    new SysIdRoutine.Config(),
+    new SysIdRoutine.Mechanism(
+      // Apply voltage to motors
+      this::setVoltage,
+      // Log data
+      log -> {
+        log.motor("elevator-left")
+          .voltage(appliedVolts)
+          .position(GetLeftElevatorPosition())
+          .velocity(GetLeftElevatorVelocity());
+        log.motor("elevator-right")
+          .voltage(appliedVolts)
+          .position(GetRightElevatorPosition())
+          .velocity(GetRightElevatorVelocity());
+      },
+      this
+    )
+  );
+
+  private double appliedVolts = 0.0;
 
   /** Creates a new Elevator. */
   public Elevator() {
@@ -48,7 +75,13 @@ public class Elevator extends SubsystemBase {
     RightElevatorConfig.follow(20, true);
 
     LeftElevatorConfig.encoder.positionConversionFactor(11.03); // Converts 1 rotatoin of the encoder to 11.03 inches of elevator height
-    LeftElevatorConfig.closedLoop.maxMotion
+    LeftElevatorConfig.closedLoop
+    .maxOutput(0.3)
+    .minOutput(-0.3)
+    .p(0)
+    .i(0)
+    .d(0)
+      .maxMotion
       .maxVelocity(1) // TODO: Set to max velocity of elevator
       .maxAcceleration(10) //TODO: Set max accel of elevator
       .allowedClosedLoopError(1); //TODO: Set to allowed tolerance of elevator
@@ -72,7 +105,9 @@ public class Elevator extends SubsystemBase {
       MoveElevatorToPositionMaxMotion(currentElevatorTarget);
     }
     SmartDashboard.putNumber("Elevator Target", currentElevatorTarget);
-
+    // SmartDashboard for editing the P value of the sparkmax pid controller
+    LeftElevatorConfig.closedLoop.p(SmartDashboard.getNumber("ElevatorMaxMotion P Gain", 0));
+    LeftElevatorMotor.configure(LeftElevatorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
 
   }
 
@@ -81,8 +116,9 @@ public class Elevator extends SubsystemBase {
   }
 
   public void MoveElevatorToPositionMaxMotion(double position){
-    elevatorCurrentTarget = position;
-    ElevatorClosedLoopController.setReference(elevatorCurrentTarget, SparkClosedLoopController.kControlType_Position.MaxMotion);
+    currentElevatorTarget = position;
+    ElevatorClosedLoopController.setReference(currentElevatorTarget, ControlType.kMAXMotionPositionControl);
+  }
 
   public void MoveElevatorToPosition(double position){
     double PIDOutput = ElevatorPID.calculate(GetLeftElevatorPosition(), position) + ElevatorFF.calculate(position);
@@ -104,5 +140,45 @@ public class Elevator extends SubsystemBase {
   public void ResetElevatorEncoders(){
     LeftElevatorEncoder.setPosition(0);
     RightElevatorEncoder.setPosition(0);
+  }
+  public void SetElevatorTarget(double targetHeight){
+    currentElevatorTarget = targetHeight;
+  }
+
+  /**
+   * Sets the voltage to both elevator motors.
+   * Used for SysId testing.
+   * @param volts The voltage to set
+   */
+  public void setVoltage(double volts) {
+    appliedVolts = volts;
+    LeftElevatorMotor.setVoltage(volts);
+    // Right motor follows left with inversion, so we don't need to set it directly
+  }
+
+  /**
+   * Gets the velocity of the left elevator motor.
+   * @return Velocity in inches per second
+   */
+  public double GetLeftElevatorVelocity() {
+    return LeftElevatorEncoder.getVelocity() / 60.0; // Convert RPM to RPS (and then in/s due to conversion factor)
+  }
+
+  /**
+   * Command to run a SysId quasistatic test (gradually ramping voltage)
+   * @param direction Direction of the test (true = forward, false = backward)
+   * @return The SysId quasistatic test command
+   */
+  public Command sysIdQuasistatic(boolean direction) {
+    return sysIdRoutine.quasistatic(direction ? SysIdRoutine.Direction.kForward : SysIdRoutine.Direction.kReverse);
+  }
+
+  /**
+   * Command to run a SysId dynamic test (applying constant voltage)
+   * @param direction Direction of the test (true = forward, false = backward)
+   * @return The SysId dynamic test command
+   */
+  public Command sysIdDynamic(boolean direction) {
+    return sysIdRoutine.dynamic(direction ? SysIdRoutine.Direction.kForward : SysIdRoutine.Direction.kReverse);
   }
 }
