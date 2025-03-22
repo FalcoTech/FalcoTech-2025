@@ -33,8 +33,8 @@ public class Wrist extends SubsystemBase {
 
   private final DutyCycleEncoder WristEncoder = new DutyCycleEncoder(0, 40, 0);
 
+  ArmFeedforward m_WristFeedforward = new ArmFeedforward(0, 0.05, 0.01); //TODO: Tune these values
   private final PIDController m_PIDController = new PIDController(.075, 0, 0);
-  ArmFeedforward m_WristFeedforward = new ArmFeedforward(0.25, 0.12, 0.01); //TODO: Tune these values
 
   /** Creates a new Wrist. */
   public Wrist() {
@@ -60,7 +60,8 @@ public class Wrist extends SubsystemBase {
     WristMotor.set(speed.get() * .2);
   }
   public void MoveWristToPosition(double position){
-    double PIDOutput = m_PIDController.calculate(GetWristEncoderPosition(), position) + m_WristFeedforward.calculate(position + 90,3); //TODO : Tune offset and velocity;
+    // angle in radians = (sensor*(pi/20)) - pi/2
+    double PIDOutput = m_PIDController.calculate(GetWristEncoderPosition(), position) + m_WristFeedforward.calculate(position*(Math.PI/20)- Math.PI/2,3); //TODO : Tune offset and velocity;
     double CommandedOutput = Math.copySign(Math.min(Math.abs(PIDOutput), .2), PIDOutput);
     WristMotor.set(CommandedOutput);
     // SmartDashboard.putNumber("Wrist Motor Output", m_PIDController.calculate(GetWristEncoderPosition(), position));
