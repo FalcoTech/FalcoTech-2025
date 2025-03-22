@@ -39,6 +39,6 @@ public class SetWristToPosition extends Command {
   @Override
   public boolean isFinished() {
     // return m_wrist.GetWristEncoderPosition() == position;
-    return (position == 0 ? m_wrist.GetWristEncoderPosition() < .05 : false);
+    return (position == 0 ? m_wrist.GetWristEncoderPosition() < .05 : false) || Math.abs(RobotContainer.Copilot.getLeftY()) > .2;
   }
 }

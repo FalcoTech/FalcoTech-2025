@@ -33,7 +33,7 @@ public class Wrist extends SubsystemBase {
 
   private final DutyCycleEncoder WristEncoder = new DutyCycleEncoder(0, 40, 0);
 
-  private final PIDController m_PIDController = new PIDController(.11, 0, 0);
+  private final PIDController m_PIDController = new PIDController(.075, 0, 0);
   ArmFeedforward m_WristFeedforward = new ArmFeedforward(0.25, 0.12, 0.01); //TODO: Tune these values
 
   /** Creates a new Wrist. */
@@ -72,7 +72,7 @@ public class Wrist extends SubsystemBase {
 
   public double GetWristEncoderPosition(){
     // return WristMotor.getPosition().getValueAsDouble();
-    return WristEncoder.get() - .94;
+    return WristEncoder.get() - .94 + .27;
   }
 
   public void ResetWristEncoder(){

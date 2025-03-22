@@ -120,13 +120,13 @@ public class RobotContainer {
         elevator.setDefaultCommand(new RunElevator(() -> Math.abs(Copilot.getRightY() * .5)));
         Copilot.start().onTrue(new InstantCommand(() -> elevator.ResetElevatorEncoders()));
         Copilot.b().onTrue(new SetElevatorToPosition(6.3));
-        Copilot.x().onTrue(new SetElevatorToPosition(14));
+        Copilot.x().onTrue(new SetElevatorToPosition(14.8));
 
         Copilot.povLeft().onTrue(new SetElevatorToPosition(12));
         
         //ALGAE INTAKE
-        Copilot.leftBumper().whileTrue(new RunAlgaeIntake(() -> .8));
-        Copilot.rightBumper().whileTrue(new RunAlgaeIntake(() -> -.8));
+        Copilot.leftBumper().whileTrue(new RunAlgaeIntake(() -> 1.0));
+        Copilot.rightBumper().whileTrue(new RunAlgaeIntake(() -> -.3));
 
         //CORAL INTAKE
         coralIntake.setDefaultCommand(new RunCoralIntake(()-> Copilot.getLeftTriggerAxis()-Copilot.getRightTriggerAxis()));
@@ -134,17 +134,27 @@ public class RobotContainer {
 
         //WRIST
         wrist.setDefaultCommand(new RunWrist(() -> Copilot.getLeftY()));
-        Copilot.a().whileTrue(new SetWristToPosition(3.3));
+        Copilot.a().onTrue(new SetWristToPosition(5.8));
         
-        // Copilot.povUp().onTrue(new SequentialCommandGroup(
-        //     new SequentialElevatorSetpoint(14),
-        //     new ParallelRaceGroup(
-        //         new SetElevatorToPosition(14),
-        //         new SetWristToPosition(3.3) 
-        //     )
-        // ));
+        Copilot.povUp().onTrue(new SequentialCommandGroup( //L3 SCORING VALUES
+            new SequentialElevatorSetpoint(14.8),
+            new ParallelRaceGroup(
+                new SetElevatorToPosition(14.8),
+                new SetWristToPosition(5.8) 
+            )
+        ));
+
+        Copilot.povDown().onTrue(new SequentialCommandGroup( //CORAL INTAKE VALUES
+            new SequentialElevatorSetpoint(12.8),
+            new ParallelRaceGroup(
+                new SetElevatorToPosition(12.8),
+                new SetWristToPosition(20.1) 
+            )
+        ));
+        // Copilot.povUp().onTrue(new SequentialElevatorSetpoint(3));
+
+        Copilot.povRight().onTrue(new SequentialCommandGroup(new RunCoralIntake(() -> -.1).withTimeout(.15), new RunCoralIntake(() -> .1).withTimeout(.15), new RunCoralIntake(() -> -.1).withTimeout(.15), new RunCoralIntake(() -> .1).withTimeout(.15), new RunCoralIntake(() -> 0.0).withTimeout(0.15)));
         //TODO: Setup SetPoints as smartdashboard stuff
-        Copilot.povUp().onTrue(new SequentialElevatorSetpoint(3));
     }
 
     public Command getAutonomousCommand() {
