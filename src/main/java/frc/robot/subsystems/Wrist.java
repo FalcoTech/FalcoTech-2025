@@ -17,6 +17,7 @@ import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.revrobotics.AbsoluteEncoder;
 
+import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.DutyCycle;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
@@ -33,8 +34,25 @@ public class Wrist extends SubsystemBase {
   private final DutyCycleEncoder WristEncoder = new DutyCycleEncoder(0, 40, 0);
 
   private final PIDController m_PIDController = new PIDController(.11, 0, 0);
+  ArmFeedforward m_WristFeedforward = new ArmFeedforward(0.25, 0.12, 0.01); //TODO: Tune these values
+
   /** Creates a new Wrist. */
   public Wrist() {
+    //Set actual Ratio?
+    WristMotorConfig.Feedback.SensorToMechanismRatio = 25;
+    // WristMotorConfig.Slot0.kS = 0.25; // Add 0.25 V output to overcome static friction
+    // WristMotorConfig.Slot0.kV = 0.12; // A velocity target of 1 rps results in 0.12 V output
+    // WristMotorConfig.Slot0.kA = 0.01; // An acceleration of 1 rps/s requires 0.01 V output
+    // WristMotorConfig.Slot0.kP = 4.8; // A position error of 2.5 rotations results in 12 V output
+    // WristMotorConfig.Slot0.kI = 0; // no output for integrated error
+    // WristMotorConfig.Slot0.kD = 0.1; // A velocity error of 1 rps results in 0.1 V output
+
+    // WristMotorConfig.MotionMagic.MotionMagicCruiseVelocity = 0.5; // 0.5 rotations per second
+    // WristMotorConfig.MotionMagic.MotionMagicAcceleration = 1; // 1 rotations per second squared
+    // WristMotorConfig.MotionMagic.MotionMagicJerk = 10; // 0.05 rotations of error allowed
+    // WristMotorConfig.MotionMagic.MotionMagicExpo_kV = 3; //Voltage required to maintain a given velocity, in V/rps
+    // WristMotorConfig.MotionMagic.MotionMagicExpo_kA = 0.1; //Voltage required to apply a given acceleration, in V/rps/s
+
     WristMotorConfigurator.apply(WristMotorConfig);
     WristMotor.setNeutralMode(NeutralModeValue.Brake);
 
@@ -42,6 +60,8 @@ public class Wrist extends SubsystemBase {
     // SmartDashboard.putBoolean("Wrist Connected?", WristEncoder.isConnected());
 
     WristEncoder.setInverted(true);
+
+    m_PIDController.setTolerance(1);
   }
 
   @Override
@@ -56,7 +76,7 @@ public class Wrist extends SubsystemBase {
     WristMotor.set(speed.get() * .2);
   }
   public void MoveWristToPosition(double position){
-    double PIDOutput = m_PIDController.calculate(GetWristEncoderPosition(), position);
+    double PIDOutput = m_PIDController.calculate(GetWristEncoderPosition(), position) + m_WristFeedforward.calculate(position + 90,3); //TODO : Tune offset and velocity
     double CommandedOutput = Math.copySign(Math.min(Math.abs(PIDOutput), .2), PIDOutput);
     WristMotor.set(CommandedOutput);
     // SmartDashboard.putNumber("Wrist Motor Output", m_PIDController.calculate(GetWristEncoderPosition(), position));

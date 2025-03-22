@@ -86,7 +86,7 @@ public class Elevator extends SubsystemBase {
 
     RightElevatorConfig.follow(20, true);
 
-    LeftElevatorConfig.encoder.positionConversionFactor(11.03); // Converts 1 rotatoin of the encoder to 11.03 inches of elevator height
+    LeftElevatorConfig.encoder.positionConversionFactor(2.206); // Converts 1 rotation of the encoder to 2.206 inches of elevator height
     LeftElevatorConfig.closedLoop
     .maxOutput(0.3)
     .minOutput(-0.3)
@@ -96,7 +96,7 @@ public class Elevator extends SubsystemBase {
       .maxMotion
       .maxVelocity(1) // TODO: Set to max velocity of elevator
       .maxAcceleration(10) //TODO: Set max accel of elevator
-      .allowedClosedLoopError(1); //TODO: Set to allowed tolerance of elevator
+      .allowedClosedLoopError(0.25); //TODO: Set to allowed tolerance of elevator
    
     LeftElevatorMotor.configure(LeftElevatorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     RightElevatorMotor.configure(RightElevatorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
@@ -104,6 +104,9 @@ public class Elevator extends SubsystemBase {
     ResetElevatorEncoders();  
 
     SmartDashboard.putData("Reset Elevator Encoder", new InstantCommand(() -> ResetElevatorEncoders()).ignoringDisable(true));
+    SmartDashboard.putBoolean("Hold Elevator Position", false);
+    SmartDashboard.putNumber("ElevatorMaxMotion P Gain", 0);
+    SmartDashboard.putNumber("Elevator Target", currentElevatorTarget);
   }
 
   @Override
@@ -111,15 +114,19 @@ public class Elevator extends SubsystemBase {
     // This method will be called once per scheduler run
     SmartDashboard.putNumber("Left Elevator Encoder", GetLeftElevatorPosition());
     SmartDashboard.putNumber("Right Elevator Encoder", GetRightElevatorPosition());
+    SmartDashboard.putNumber("Elevator Motor Output", LeftElevatorMotor.getAppliedOutput());
 
     // Smart Dashboard button to toggle holding at the setpoint using the MoveElevatorToMaxMotion method
     if (SmartDashboard.getBoolean("Hold Elevator Position", false)) {
       MoveElevatorToPositionMaxMotion(currentElevatorTarget);
     }
-    SmartDashboard.putNumber("Elevator Target", currentElevatorTarget);
+    else{
+      StopElevator();
+    }
+    currentElevatorTarget = SmartDashboard.getNumber("Elevator Target", currentElevatorTarget);
     // SmartDashboard for editing the P value of the sparkmax pid controller
     LeftElevatorConfig.closedLoop.p(SmartDashboard.getNumber("ElevatorMaxMotion P Gain", 0));
-    LeftElevatorMotor.configure(LeftElevatorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
+    LeftElevatorMotor.configure(LeftElevatorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
 
   }
 
