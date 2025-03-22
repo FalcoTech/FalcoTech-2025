@@ -39,6 +39,7 @@ import frc.robot.commands.Wrist.RunWrist;
 import frc.robot.commands.Wrist.SetWristToPosition;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.AlgaeIntake;
+import frc.robot.subsystems.Climb;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.CoralIntake;
 import frc.robot.subsystems.Elevator;
@@ -84,6 +85,7 @@ public class RobotContainer {
     public static final Wrist wrist = new Wrist();
     public static final AlgaeIntake algaeIntake = new AlgaeIntake();
     public static final CoralIntake coralIntake = new CoralIntake();
+    public static final Climb climb = new Climb();
 
     public RobotContainer() {
         /* Put autonomous chooser on dashboard */
@@ -130,6 +132,10 @@ public class RobotContainer {
         //WRIST
         wrist.setDefaultCommand(new RunWrist(() -> Copilot.getLeftY()));
         Copilot.a().whileTrue(new SetWristToPosition(3.3));
+
+        //Climb
+        Copilot.povUp().or(Copilot.povUpLeft()).or(Copilot.povUpRight()).whileTrue(climb.RunClimbCommand(() -> 0.25).withTimeout(5));
+        Copilot.povDown().or(Copilot.povDownLeft()).or(Copilot.povDownRight()).whileTrue(climb.RunClimbCommand(() -> -0.25).withTimeout(5));
         
         // Copilot.povUp().onTrue(new SequentialCommandGroup(
             // new SetElevatorToPosition(14),
