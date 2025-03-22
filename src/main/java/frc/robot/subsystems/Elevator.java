@@ -74,7 +74,7 @@ public class Elevator extends SubsystemBase {
     LeftElevatorMotor.set(CommandedOutput);
     // SmartDashboard.putNumber("Elevator Motor Output", ElevatorPID.calculate(GetLeftElevatorPosition(), position) + ElevatorFF.calculate(1, 1));
   }
-
+  //TODO: Add Safteys to move Wrist out of way
   public void StopElevator(){
     LeftElevatorMotor.set(0);
   }

@@ -45,7 +45,7 @@ public class Wrist extends SubsystemBase {
     // SmartDashboard.putBoolean("Wrist Connected?", WristEncoder.isConnected());
 
     WristEncoder.setInverted(true);
-    m_PIDController.setTolerance(1);
+    m_PIDController.setTolerance(0.25);
   }
 
   @Override
@@ -61,7 +61,7 @@ public class Wrist extends SubsystemBase {
   }
   public void MoveWristToPosition(double position){
     // angle in radians = (sensor*(pi/20)) - pi/2
-    double PIDOutput = m_PIDController.calculate(GetWristEncoderPosition(), position) + m_WristFeedforward.calculate(position*(Math.PI/20)- Math.PI/2,3); //TODO : Tune offset and velocity;
+    double PIDOutput = m_PIDController.calculate(GetWristEncoderPosition(), position); //TODO : Tune offset and velocity;
     double CommandedOutput = Math.copySign(Math.min(Math.abs(PIDOutput), .2), PIDOutput);
     WristMotor.set(CommandedOutput);
     // SmartDashboard.putNumber("Wrist Motor Output", m_PIDController.calculate(GetWristEncoderPosition(), position));
@@ -73,7 +73,7 @@ public class Wrist extends SubsystemBase {
 
   public double GetWristEncoderPosition(){
     // return WristMotor.getPosition().getValueAsDouble();
-    return WristEncoder.get() - .94 + .27;
+    return WristEncoder.get() - .94;
   }
 
   public void ResetWristEncoder(){
