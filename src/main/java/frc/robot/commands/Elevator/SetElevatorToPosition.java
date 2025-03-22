@@ -12,6 +12,7 @@ import frc.robot.subsystems.Elevator;
 public class SetElevatorToPosition extends Command {
   private final Elevator m_Elevator = RobotContainer.elevator;
   private double Position; 
+
   /** Creates a new SetElevatorToPosition. */
   public SetElevatorToPosition(double position) {
     // Use addRequirements() here to declare subsystem dependencies.
@@ -26,7 +27,12 @@ public class SetElevatorToPosition extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    m_Elevator.MoveElevatorToPosition(Position);
+    if (Position < m_Elevator.GetLeftElevatorPosition()){
+      m_Elevator.StopElevator();
+    } else {
+      m_Elevator.MoveElevatorToPosition(Position);
+    }
+    
   }
 
   // Called once the command ends or is interrupted.

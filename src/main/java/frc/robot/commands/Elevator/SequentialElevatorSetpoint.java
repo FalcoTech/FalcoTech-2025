@@ -26,7 +26,11 @@ public class SequentialElevatorSetpoint extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    m_Elevator.MoveElevatorToPosition(Position);
+    if (Position < m_Elevator.GetLeftElevatorPosition()){
+      m_Elevator.StopElevator();
+    } else {
+      m_Elevator.MoveElevatorToPosition(Position);
+    }
   }
 
   // Called once the command ends or is interrupted.
@@ -38,6 +42,6 @@ public class SequentialElevatorSetpoint extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return Math.abs(Position - m_Elevator.GetLeftElevatorPosition()) < .5;
+    return Math.abs(Position - m_Elevator.GetLeftElevatorPosition()) < .15;
   }
 }
