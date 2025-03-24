@@ -42,6 +42,6 @@ public class SequentialElevatorSetpoint extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return Math.abs(Position - m_Elevator.GetLeftElevatorPosition()) < .15;
+    return Math.abs(Position - m_Elevator.GetLeftElevatorPosition()) < .15 || Math.abs(RobotContainer.Copilot.getRightY()) > .2;
   }
 }

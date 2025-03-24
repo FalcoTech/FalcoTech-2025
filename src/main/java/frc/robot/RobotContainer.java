@@ -25,6 +25,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
@@ -132,9 +133,33 @@ public class RobotContainer {
 
         //WRIST
         wrist.setDefaultCommand(new RunWrist(() -> Copilot.getLeftY()));
-        Copilot.a().onTrue(new SetWristToPosition(5.8));
         
-        Copilot.povUp().onTrue(new SequentialCommandGroup( //L3 SCORING VALUES
+
+        //ELEVATOR SETPOINTS
+        //
+        Copilot.povDown().onTrue(
+            new SequentialCommandGroup(
+                elevator.GetLeftElevatorPosition() > 1 && elevator.GetLeftElevatorPosition() < 4 && wrist.GetWristEncoderPosition() > 19 ? 
+                   new SequentialCommandGroup(
+                       new SequentialElevatorSetpoint(4), 
+                       new ParallelDeadlineGroup(new SetWristToPosition(0), new SetElevatorToPosition(4))
+                   ) : 
+                   new ParallelDeadlineGroup(
+                       new SetWristToPosition(0),
+                       new SequentialElevatorSetpoint(0)
+                   )
+            )
+        );
+        
+        Copilot.x().onTrue(new SequentialCommandGroup( //L2 SCORING
+            new SequentialElevatorSetpoint(8),
+            new ParallelRaceGroup(
+                new SetElevatorToPosition(8),
+                new SetWristToPosition(5.8)
+            )
+        ));
+
+        Copilot.y().onTrue(new SequentialCommandGroup( //L3 SCORING
             new SequentialElevatorSetpoint(14.8),
             new ParallelRaceGroup(
                 new SetElevatorToPosition(14.8),
@@ -142,16 +167,15 @@ public class RobotContainer {
             )
         ));
 
-        Copilot.povDown().onTrue(new SequentialCommandGroup( //CORAL INTAKE VALUES
+        Copilot.povUp().onTrue(new SequentialCommandGroup( //CORAL STATION VALUES
             new SequentialElevatorSetpoint(12.8),
             new ParallelRaceGroup(
                 new SetElevatorToPosition(12.8),
                 new SetWristToPosition(20.1) 
             )
         ));
-        // Copilot.povUp().onTrue(new SequentialElevatorSetpoint(3));
 
-        Copilot.povRight().onTrue(new SequentialCommandGroup(new RunCoralIntake(() -> -.1).withTimeout(.15), new RunCoralIntake(() -> .1).withTimeout(.15), new RunCoralIntake(() -> -.1).withTimeout(.15), new RunCoralIntake(() -> .1).withTimeout(.15), new RunCoralIntake(() -> 0.0).withTimeout(0.15)));
+        // Copilot.povRight().onTrue(new SequentialCommandGroup(new RunCoralIntake(() -> -.1).withTimeout(.15), new RunCoralIntake(() -> .1).withTimeout(.15), new RunCoralIntake(() -> -.1).withTimeout(.15), new RunCoralIntake(() -> .1).withTimeout(.15), new RunCoralIntake(() -> 0.0).withTimeout(0.15)));
     }
 
     public Command getAutonomousCommand() {
