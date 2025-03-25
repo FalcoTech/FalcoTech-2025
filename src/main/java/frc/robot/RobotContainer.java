@@ -172,13 +172,13 @@ public class RobotContainer {
                 new SetWristToPosition(5.8)
             )
         ));
-        Copilot.povRight().onTrue(new SequentialCommandGroup( //L4 SCORING VALUES
-        new SequentialElevatorSetpoint(20),
-        new ParallelRaceGroup(
-            new SetElevatorToPosition(20),
-            new SetWristToPosition(5.8) 
-        )
-        ));
+        // Copilot.povRight().onTrue(new SequentialCommandGroup( //L4 SCORING VALUES
+        // new SequentialElevatorSetpoint(20),
+        // new ParallelRaceGroup(
+        //     new SetElevatorToPosition(20),
+        //     new SetWristToPosition(5.8) 
+        // )
+        // ));
 
         Copilot.povUp().onTrue(new SequentialCommandGroup( //CORAL STATION VALUES
             new SequentialElevatorSetpoint(12.8),
