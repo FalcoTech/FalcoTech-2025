@@ -29,7 +29,7 @@ public class Climb extends SubsystemBase {
 	LeftClimbMotorConfig.idleMode(IdleMode.kBrake);
 	RightClimbMotorConfig.idleMode(IdleMode.kBrake);
 
-	RightClimbMotorConfig.follow(50, true);
+	RightClimbMotorConfig.follow(50, false);
 
 	LeftClimbMotor.configure(LeftClimbMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 	RightClimbMotor.configure(RightClimbMotorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);

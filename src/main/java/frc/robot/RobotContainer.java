@@ -119,9 +119,9 @@ public class RobotContainer {
         elevator.setDefaultCommand(new RunElevator(() -> Math.abs(Copilot.getRightY() * .5)));
         Copilot.start().onTrue(new InstantCommand(() -> elevator.ResetElevatorEncoders()));
         Copilot.b().onTrue(new SetElevatorToPosition(6.3));
-        Copilot.x().onTrue(new SetElevatorToPosition(14));
+        // Copilot.x().onTrue(new SetElevatorToPosition(14));
 
-        Copilot.povLeft().onTrue(new SetElevatorToPosition(12));
+        // Copilot.povLeft().onTrue(new SetElevatorToPosition(12));
         
         //ALGAE INTAKE
         algaeIntake.setDefaultCommand(new RunAlgaeIntake());
@@ -131,11 +131,12 @@ public class RobotContainer {
 
         //WRIST
         wrist.setDefaultCommand(new RunWrist(() -> Copilot.getLeftY()));
-        Copilot.a().whileTrue(new SetWristToPosition(3.3));
+        // Copilot.a().whileTrue(new SetWristToPosition(3.3));
 
         //Climb
-        Copilot.povUp().or(Copilot.povUpLeft()).or(Copilot.povUpRight()).whileTrue(climb.RunClimbCommand(() -> 0.25).withTimeout(5));
-        Copilot.povDown().or(Copilot.povDownLeft()).or(Copilot.povDownRight()).whileTrue(climb.RunClimbCommand(() -> -0.25).withTimeout(5));
+        Copilot.povLeft().whileTrue(climb.RunClimbCommand(() -> 0.25));
+        Copilot.povRight().whileTrue(climb.RunClimbCommand(() -> -0.25));
+        // Copilot.povDown().or(Copilot.povDownLeft()).or(Copilot.povDownRight()).whileTrue(climb.RunClimbCommand(() -> -0.25).withTimeout(5));
         
         // Copilot.povUp().onTrue(new SequentialCommandGroup(
             // new SetElevatorToPosition(14),
