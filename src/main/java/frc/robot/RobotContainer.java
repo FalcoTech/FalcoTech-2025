@@ -197,7 +197,7 @@ public class RobotContainer {
         /* Pathplanner named commands for the pathplanner app. TODO: make this a function */
         NamedCommands.registerCommand("TestCommand", algaeScoreCommand);
 
-        NamedCommands.registerCommand("Elevator L3", new SequentialCommandGroup(
+        NamedCommands.registerCommand("Elevator L3 Score", new SequentialCommandGroup(
             new SequentialElevatorSetpoint(14.8),
             new ParallelRaceGroup(
                 new SetElevatorToPosition(14.8),
