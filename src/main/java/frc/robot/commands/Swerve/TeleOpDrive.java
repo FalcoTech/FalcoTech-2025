@@ -34,6 +34,7 @@ public class TeleOpDrive extends Command {
     :
     RobotContainer.drive
         .withVelocityX((-RobotContainer.pilot.getLeftY() * (RobotContainer.pilot.leftBumper().getAsBoolean() ? .2 : 1)) * (RobotContainer.MaxSpeed * .5)) // Drive forward with negative Y (forward)
+        // .withVelocityX((-0.2 * (RobotContainer.pilot.leftBumper().getAsBoolean() ? .2 : 1)) * (RobotContainer.MaxSpeed * .5)) // Drive forward with negative Y (forward)
         .withVelocityY((-RobotContainer.pilot.getLeftX() * (RobotContainer.pilot.leftBumper().getAsBoolean() ? .2 : 1)) * (RobotContainer.MaxSpeed * .5)) // Drive left with negative X (left)
         .withRotationalRate((-RobotContainer.pilot.getRightX() * (RobotContainer.pilot.leftBumper().getAsBoolean() ? .2 : 1)) * (RobotContainer.MaxSpeed * .5)) 
   );

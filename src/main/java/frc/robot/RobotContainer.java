@@ -40,6 +40,7 @@ import frc.robot.commands.Coral.RunCoralIntake;
 import frc.robot.commands.Elevator.RunElevator;
 import frc.robot.commands.Elevator.SequentialElevatorSetpoint;
 import frc.robot.commands.Elevator.SetElevatorToPosition;
+import frc.robot.commands.Swerve.AlignToNearestTagWithOffset;
 import frc.robot.commands.Swerve.TeleOpDrive;
 import frc.robot.commands.Wrist.RunWrist;
 import frc.robot.commands.Wrist.SequentialWristSetpoint;
@@ -50,6 +51,7 @@ import frc.robot.subsystems.Climb;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.CoralIntake;
 import frc.robot.subsystems.Elevator;
+import frc.robot.subsystems.Vision;
 import frc.robot.subsystems.Wrist;
 
 public class RobotContainer {
@@ -82,7 +84,7 @@ public class RobotContainer {
 
     public static final PathConstraints pathFindConstraints = new PathConstraints(MaxSpeed, 4, MaxAngularRate, Units.degreesToRadians(540));
     private final Command leftFeederPathfind = AutoBuilder.pathfindToPose(leftFeederTargetPose, pathFindConstraints, 1);
-    private final Command algaeScoreCommand = AutoBuilder.pathfindToPose(algaeScoreTargerPose, pathFindConstraints, 1);
+    private final Command algaeScorePathfind = AutoBuilder.pathfindToPose(algaeScoreTargerPose, pathFindConstraints, 1);
     
     private final SendableChooser<Command> autoChooser;
 
@@ -93,11 +95,16 @@ public class RobotContainer {
     public static final AlgaeIntake algaeIntake = new AlgaeIntake();
     public static final CoralIntake coralIntake = new CoralIntake();
     public static final Climb climb = new Climb();
+    public static final Vision vision = new Vision(drivetrain);
 
     public RobotContainer() {
         /* Put autonomous chooser on dashboard */
         autoChooser = AutoBuilder.buildAutoChooser("Tests");
         SmartDashboard.putData("Auto Mode", autoChooser);
+
+        // SmartDashboard.putData("Align to Tag", new AlignToNearestTagWithOffset(false));
+        // SmartDashboard.putData("Algae Intake Pathfind", algaeScorePathfind);
+        SmartDashboard.putData("Pathfind to Nearest AprilTag", new InstantCommand(() -> vision.pathfindToNearestAprilTag(true).schedule()));
 
         configureBindings();
         RegisterNamedCommands();
@@ -111,6 +118,9 @@ public class RobotContainer {
 
         // reset the field-centric heading on start button press
         pilot.start().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+
+        pilot.povLeft().whileTrue(vision.pathfindToNearestAprilTag(false));
+        pilot.povRight().whileTrue(vision.pathfindToNearestAprilTag(true));
         
         drivetrain.registerTelemetry(logger::telemeterize);
           
@@ -200,7 +210,7 @@ public class RobotContainer {
 
     private void RegisterNamedCommands(){
         /* Pathplanner named commands for the pathplanner app. TODO: make this a function */
-        NamedCommands.registerCommand("TestCommand", algaeScoreCommand);
+        NamedCommands.registerCommand("TestCommand", algaeScorePathfind);
 
         NamedCommands.registerCommand("Elevator L3 Score", new SequentialCommandGroup(
             new SequentialElevatorSetpoint(14.8),

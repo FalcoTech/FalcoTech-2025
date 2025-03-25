@@ -14,6 +14,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 
@@ -32,8 +33,8 @@ public class AlignToNearestTagWithOffset extends Command {
   private boolean offsetRight;
   private AprilTag targetTag;
   private Pose2d currentPose;
-  private Pose2d targetPose;
-  private Command pathfindingCommand;
+  public static Pose2d targetPose;
+  public static Command pathfindingCommand;
   double forwardDistance = 0.3048;  // 12 inches in meters
   double lateralDistance = 0.1524;  // 6 inches in meters for left/right offset
   private List<AprilTag> reefTags;
@@ -48,7 +49,6 @@ public class AlignToNearestTagWithOffset extends Command {
       reefTags.addAll(field.getTags().subList(17,22));
       // Use addRequirements() here to declare subsystem dependencies.
       this.offsetRight = offsetRight;
-      addRequirements(m_drivetrain);
     }
   
     // Called when the command is initially scheduled.
@@ -59,13 +59,13 @@ public class AlignToNearestTagWithOffset extends Command {
       targetTag = getNearestTag();
       targetPose = getTargetPose(targetTag);
       
-      pathfindingCommand = AutoBuilder.pathfindToPose(targetPose, m_pathConstraints, 0);
-      pathfindingCommand.schedule();  
+      // AutoBuilder.pathfindToPose(targetPose, m_pathConstraints, 0);
     }
   
     // Called every time the scheduler runs while the command is scheduled.
     @Override
-    public void execute() {      
+    public void execute() {
+      
     }
   
     // Called once the command ends or is interrupted.
@@ -76,10 +76,11 @@ public class AlignToNearestTagWithOffset extends Command {
     @Override
     public boolean isFinished() {
       // if robot pose is within 2 inches of target pose stop and rumble controller?
-      if(m_drivetrain.getState().Pose.getTranslation().getDistance(targetPose.getTranslation()) < 0.05 ){ // 2 inches in meters
-        // new RumbleCommand(RobotContainer.pilot, 0.5).schedule();
-        return true;
-      }
+      // if(m_drivetrain.getState().Pose.getTranslation().getDistance(targetPose.getTranslation()) < 0.05 ){ // 2 inches in meters
+      //   // new RumbleCommand(RobotContainer.pilot, 0.5).schedule();
+      //   return true;
+      // }
+      // return false;
       return false;
     }
 
