@@ -44,6 +44,7 @@ import frc.robot.commands.Wrist.SequentialWristSetpoint;
 import frc.robot.commands.Wrist.SetWristToPosition;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.AlgaeIntake;
+import frc.robot.subsystems.Climb;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.CoralIntake;
 import frc.robot.subsystems.Elevator;
@@ -89,6 +90,7 @@ public class RobotContainer {
     public static final Wrist wrist = new Wrist();
     public static final AlgaeIntake algaeIntake = new AlgaeIntake();
     public static final CoralIntake coralIntake = new CoralIntake();
+    public static final Climb climb = new Climb();
 
     public RobotContainer() {
         /* Put autonomous chooser on dashboard */
@@ -121,10 +123,7 @@ public class RobotContainer {
         //ELEVATOR
         elevator.setDefaultCommand(new RunElevator(() -> Math.abs(Copilot.getRightY() * .5)));
         Copilot.start().onTrue(new InstantCommand(() -> elevator.ResetElevatorEncoders()));
-        // Copilot.b().onTrue(new SetElevatorToPosition(6.3)); // L1 ish 
-        // Copilot.x().onTrue(new SetElevatorToPosition(14.8)); //L3 Position
-
-        // Copilot.povLeft().onTrue(new SetElevatorToPosition(12));
+        
         
         //ALGAE INTAKE
         Copilot.leftBumper().whileTrue(new RunAlgaeIntake(() -> 1.0));
@@ -136,6 +135,9 @@ public class RobotContainer {
 
         //WRIST
         wrist.setDefaultCommand(new RunWrist(() -> Copilot.getLeftY()));
+        //Climb
+        Copilot.povLeft().whileTrue(climb.RunClimbCommand(() -> 0.25));
+        Copilot.povRight().whileTrue(climb.RunClimbCommand(() -> -0.25));
         
 
         //ELEVATOR SETPOINTS
