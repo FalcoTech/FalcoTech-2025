@@ -16,6 +16,8 @@ import com.pathplanner.lib.path.PathConstraints;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
@@ -180,5 +182,19 @@ public class RobotContainer {
     private void RegisterNamedCommands(){
         /* Pathplanner named commands for the pathplanner app. TODO: make this a function */
         NamedCommands.registerCommand("TestCommand", algaeScoreCommand);
+    }
+
+    public Pose2d to2dPose(Pose3d pose3d) {
+        // Extract x and y components from the Translation3d
+        Translation2d translation2d = new Translation2d(
+            pose3d.getX(),
+            pose3d.getY()
+        );
+        
+        // Convert the rotation - we'll use the rotation around the Z axis
+        Rotation2d rotation2d = new Rotation2d(pose3d.getRotation().getZ());
+        
+        // Create and return a new Pose2d
+        return new Pose2d(translation2d, rotation2d);
     }
 }
