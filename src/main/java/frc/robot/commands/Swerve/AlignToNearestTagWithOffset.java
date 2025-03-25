@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -42,6 +43,7 @@ public class AlignToNearestTagWithOffset extends Command {
   
   public AlignToNearestTagWithOffset(boolean offsetRight) {
       //reducing the number of tags to loop through
+      reefTags = new ArrayList<AprilTag>();
       reefTags.addAll(field.getTags().subList(6,11));
       reefTags.addAll(field.getTags().subList(17,22));
       // Use addRequirements() here to declare subsystem dependencies.
@@ -57,16 +59,13 @@ public class AlignToNearestTagWithOffset extends Command {
       targetTag = getNearestTag();
       targetPose = getTargetPose(targetTag);
       
-      Command pathfindingCommand = AutoBuilder.pathfindToPose(targetPose, m_pathConstraints, 0);
-  
-  
+      pathfindingCommand = AutoBuilder.pathfindToPose(targetPose, m_pathConstraints, 0);
+      pathfindingCommand.schedule();  
     }
   
     // Called every time the scheduler runs while the command is scheduled.
     @Override
-    public void execute() {
-      pathfindingCommand.execute();
-      
+    public void execute() {      
     }
   
     // Called once the command ends or is interrupted.
@@ -78,7 +77,7 @@ public class AlignToNearestTagWithOffset extends Command {
     public boolean isFinished() {
       // if robot pose is within 2 inches of target pose stop and rumble controller?
       if(m_drivetrain.getState().Pose.getTranslation().getDistance(targetPose.getTranslation()) < 0.05 ){ // 2 inches in meters
-        new RumbleCommand(RobotContainer.pilot, 0.5).schedule();
+        // new RumbleCommand(RobotContainer.pilot, 0.5).schedule();
         return true;
       }
       return false;
@@ -141,7 +140,11 @@ public class AlignToNearestTagWithOffset extends Command {
       }
     }
     // print out the distance to the tag for debugging to make sure this works
-    System.out.println("Distance to tag " + nearestTag.ID + " is " + nearestDistance);
+    if (nearestTag != null) {
+      System.out.println("Distance to tag " + nearestTag.ID + " is " + nearestDistance);
+    } else {
+      System.out.println("No valid tags found");
+    }
     return nearestTag;
   }
 }
