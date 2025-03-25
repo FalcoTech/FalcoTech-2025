@@ -123,10 +123,7 @@ public class RobotContainer {
         //ELEVATOR
         elevator.setDefaultCommand(new RunElevator(() -> Math.abs(Copilot.getRightY() * .5)));
         Copilot.start().onTrue(new InstantCommand(() -> elevator.ResetElevatorEncoders()));
-        // Copilot.b().onTrue(new SetElevatorToPosition(6.3)); // L1 ish 
-        // Copilot.x().onTrue(new SetElevatorToPosition(14.8)); //L3 Position
-
-        // Copilot.povLeft().onTrue(new SetElevatorToPosition(12));
+        
         
         //ALGAE INTAKE
         Copilot.leftBumper().whileTrue(new RunAlgaeIntake(() -> 1.0));

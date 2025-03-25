@@ -60,8 +60,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private final SwerveRequest.SysIdSwerveSteerGains m_steerCharacterization = new SwerveRequest.SysIdSwerveSteerGains();
     private final SwerveRequest.SysIdSwerveRotation m_rotationCharacterization = new SwerveRequest.SysIdSwerveRotation();
 
-    private boolean doRejectUpdate;
-
     /* SysId routine for characterizing translation. This is used to find PID gains for the drive motors. */
     private final SysIdRoutine m_sysIdRoutineTranslation = new SysIdRoutine(
         new SysIdRoutine.Config(
@@ -284,13 +282,11 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             });
         }
 
-        LimelightHelpers.SetRobotOrientation("", getState().Pose.getRotation().getDegrees(), 0, 0, 0, 0, 0);
-        LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("");
-
-        if (!(Math.abs(getState().Speeds.omegaRadiansPerSecond) > Math.PI * 2) || !(mt2.tagCount == 0)){
-            addVisionMeasurement(mt2.pose, Utils.fpgaToCurrentTime(mt2.timestampSeconds),
-            VecBuilder.fill(.7, .7, 9999999));
-        }
+        
+        // if (!(Math.abs(getState().Speeds.omegaRadiansPerSecond) > Math.PI * 2) || !(mt2.tagCount == 0)){
+        //     addVisionMeasurement(mt2.pose, Utils.fpgaToCurrentTime(mt2.timestampSeconds),
+        //     VecBuilder.fill(.7, .7, 9999999));
+        // }
 
     }
 
