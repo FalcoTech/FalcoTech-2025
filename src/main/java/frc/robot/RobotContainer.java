@@ -40,6 +40,7 @@ import frc.robot.commands.Elevator.SequentialElevatorSetpoint;
 import frc.robot.commands.Elevator.SetElevatorToPosition;
 import frc.robot.commands.Swerve.TeleOpDrive;
 import frc.robot.commands.Wrist.RunWrist;
+import frc.robot.commands.Wrist.SequentialWristSetpoint;
 import frc.robot.commands.Wrist.SetWristToPosition;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.AlgaeIntake;
@@ -120,8 +121,8 @@ public class RobotContainer {
         //ELEVATOR
         elevator.setDefaultCommand(new RunElevator(() -> Math.abs(Copilot.getRightY() * .5)));
         Copilot.start().onTrue(new InstantCommand(() -> elevator.ResetElevatorEncoders()));
-        Copilot.b().onTrue(new SetElevatorToPosition(6.3)); // L1 ish 
-        Copilot.x().onTrue(new SetElevatorToPosition(14.8)); //L3 Position
+        // Copilot.b().onTrue(new SetElevatorToPosition(6.3)); // L1 ish 
+        // Copilot.x().onTrue(new SetElevatorToPosition(14.8)); //L3 Position
 
         // Copilot.povLeft().onTrue(new SetElevatorToPosition(12));
         
@@ -165,7 +166,7 @@ public class RobotContainer {
             new SequentialElevatorSetpoint(14.8),
             new ParallelRaceGroup(
                 new SetElevatorToPosition(14.8),
-                new SetWristToPosition(5.8) 
+                new SetWristToPosition(5.8)
             )
         ));
         Copilot.povRight().onTrue(new SequentialCommandGroup( //L4 SCORING VALUES
@@ -195,5 +196,19 @@ public class RobotContainer {
     private void RegisterNamedCommands(){
         /* Pathplanner named commands for the pathplanner app. TODO: make this a function */
         NamedCommands.registerCommand("TestCommand", algaeScoreCommand);
+
+        NamedCommands.registerCommand("Elevator L3", new SequentialCommandGroup(
+            new SequentialElevatorSetpoint(14.8),
+            new ParallelRaceGroup(
+                new SetElevatorToPosition(14.8),
+                new SequentialWristSetpoint(5.8)
+            ),
+            new ParallelRaceGroup(
+                new SetElevatorToPosition(14.8),
+                new SetWristToPosition(5.8),
+                new RunCoralIntake(() -> 0.3).withTimeout(2)
+            ),
+            new SequentialWristSetpoint(0)
+        ));
     }
 }

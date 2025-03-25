@@ -16,6 +16,7 @@ import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 
 import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.numbers.N1;
@@ -287,7 +288,8 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("");
 
         if (!(Math.abs(getState().Speeds.omegaRadiansPerSecond) > Math.PI * 2) || !(mt2.tagCount == 0)){
-            
+            addVisionMeasurement(mt2.pose, Utils.fpgaToCurrentTime(mt2.timestampSeconds),
+            VecBuilder.fill(.7, .7, 9999999));
         }
 
     }
