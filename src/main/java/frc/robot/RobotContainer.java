@@ -27,6 +27,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
@@ -41,9 +42,11 @@ import frc.robot.commands.Elevator.SequentialElevatorSetpoint;
 import frc.robot.commands.Elevator.SetElevatorToPosition;
 import frc.robot.commands.Swerve.TeleOpDrive;
 import frc.robot.commands.Wrist.RunWrist;
+import frc.robot.commands.Wrist.SequentialWristSetpoint;
 import frc.robot.commands.Wrist.SetWristToPosition;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.AlgaeIntake;
+import frc.robot.subsystems.Climb;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.CoralIntake;
 import frc.robot.subsystems.Elevator;
@@ -89,6 +92,7 @@ public class RobotContainer {
     public static final Wrist wrist = new Wrist();
     public static final AlgaeIntake algaeIntake = new AlgaeIntake();
     public static final CoralIntake coralIntake = new CoralIntake();
+    public static final Climb climb = new Climb();
 
     public RobotContainer() {
         /* Put autonomous chooser on dashboard */
@@ -121,14 +125,12 @@ public class RobotContainer {
         //ELEVATOR
         elevator.setDefaultCommand(new RunElevator(() -> Math.abs(Copilot.getRightY() * .5)));
         Copilot.start().onTrue(new InstantCommand(() -> elevator.ResetElevatorEncoders()));
-        Copilot.b().onTrue(new SetElevatorToPosition(6.3)); // L1 ish 
-        Copilot.x().onTrue(new SetElevatorToPosition(14.8)); //L3 Position
-
-        // Copilot.povLeft().onTrue(new SetElevatorToPosition(12));
+        
         
         //ALGAE INTAKE
         Copilot.leftBumper().whileTrue(new RunAlgaeIntake(() -> 1.0));
-        Copilot.rightBumper().whileTrue(new RunAlgaeIntake(() -> -.3));
+        Copilot.rightBumper().whileTrue(new RunAlgaeIntake(() -> -.3)).onFalse(new RunAlgaeIntake(() -> 1.0).withTimeout(2));
+
 
         //CORAL INTAKE
         coralIntake.setDefaultCommand(new RunCoralIntake(()-> Copilot.getLeftTriggerAxis()-Copilot.getRightTriggerAxis()));
@@ -136,42 +138,59 @@ public class RobotContainer {
 
         //WRIST
         wrist.setDefaultCommand(new RunWrist(() -> Copilot.getLeftY()));
-        Copilot.a().onTrue(new SetWristToPosition(5.8)); //Coral Place angle
+        //Climb
+        Copilot.povLeft().whileTrue(climb.RunClimbCommand(() -> 0.25));
+        Copilot.povRight().whileTrue(climb.RunClimbCommand(() -> -0.25));
         
-        Copilot.povLeft().onTrue(new SequentialCommandGroup( //L2 SCORING VALUES
-        new SequentialElevatorSetpoint(8),
-        new ParallelRaceGroup(
-            new SetElevatorToPosition(8),
-            new SetWristToPosition(5.8) 
-        )
+
+        //ELEVATOR SETPOINTS
+        //
+        Copilot.povDown().onTrue(
+            new SequentialCommandGroup(
+                elevator.GetLeftElevatorPosition() > 1 && elevator.GetLeftElevatorPosition() < 4 && wrist.GetWristEncoderPosition() > 19 ? 
+                   new SequentialCommandGroup(
+                       new SequentialElevatorSetpoint(4), 
+                       new ParallelDeadlineGroup(new SetWristToPosition(0), new SetElevatorToPosition(4))
+                   ) : 
+                   new ParallelDeadlineGroup(
+                       new SetWristToPosition(0),
+                       new SequentialElevatorSetpoint(0)
+                   )
+            )
+        );
+        
+        Copilot.x().onTrue(new SequentialCommandGroup( //L2 SCORING
+            new SequentialElevatorSetpoint(8),
+            new ParallelRaceGroup(
+                new SetElevatorToPosition(8),
+                new SetWristToPosition(5.8)
+            )
         ));
-        Copilot.povUp().onTrue(new SequentialCommandGroup( //L3 SCORING VALUES
+
+        Copilot.y().onTrue(new SequentialCommandGroup( //L3 SCORING
             new SequentialElevatorSetpoint(14.8),
             new ParallelRaceGroup(
                 new SetElevatorToPosition(14.8),
-                new SetWristToPosition(5.8) 
+                new SetWristToPosition(5.8)
             )
         ));
-        Copilot.povRight().onTrue(new SequentialCommandGroup( //L4 SCORING VALUES
-        new SequentialElevatorSetpoint(20),
-        new ParallelRaceGroup(
-            new SetElevatorToPosition(20),
-            new SetWristToPosition(5.8) 
-        )
-        ));
+        // Copilot.povRight().onTrue(new SequentialCommandGroup( //L4 SCORING VALUES
+        // new SequentialElevatorSetpoint(20),
+        // new ParallelRaceGroup(
+        //     new SetElevatorToPosition(20),
+        //     new SetWristToPosition(5.8) 
+        // )
+        // ));
 
-
-        Copilot.povDown().onTrue(new SequentialCommandGroup( //CORAL INTAKE VALUES
+        Copilot.povUp().onTrue(new SequentialCommandGroup( //CORAL STATION VALUES
             new SequentialElevatorSetpoint(12.8),
             new ParallelRaceGroup(
                 new SetElevatorToPosition(12.8),
                 new SetWristToPosition(20.1) 
             )
         ));
-        // Copilot.povUp().onTrue(new SequentialElevatorSetpoint(3));
 
-        Copilot.x().onTrue(new SequentialCommandGroup(new RunCoralIntake(() -> -.1).withTimeout(.15), new RunCoralIntake(() -> .1).withTimeout(.15), new RunCoralIntake(() -> -.1).withTimeout(.15), new RunCoralIntake(() -> .1).withTimeout(.15), new RunCoralIntake(() -> 0.0).withTimeout(0.15)));
-        //TODO: Setup SetPoints as smartdashboard stuff
+        // Copilot.povRight().onTrue(new SequentialCommandGroup(new RunCoralIntake(() -> -.1).withTimeout(.15), new RunCoralIntake(() -> .1).withTimeout(.15), new RunCoralIntake(() -> -.1).withTimeout(.15), new RunCoralIntake(() -> .1).withTimeout(.15), new RunCoralIntake(() -> 0.0).withTimeout(0.15)));
     }
 
     public Command getAutonomousCommand() {
@@ -182,6 +201,20 @@ public class RobotContainer {
     private void RegisterNamedCommands(){
         /* Pathplanner named commands for the pathplanner app. TODO: make this a function */
         NamedCommands.registerCommand("TestCommand", algaeScoreCommand);
+
+        NamedCommands.registerCommand("Elevator L3 Score", new SequentialCommandGroup(
+            new SequentialElevatorSetpoint(14.8),
+            new ParallelRaceGroup(
+                new SetElevatorToPosition(14.8),
+                new SequentialWristSetpoint(5.8)
+            ),
+            new ParallelRaceGroup(
+                new SetElevatorToPosition(14.8),
+                new SetWristToPosition(5.8),
+                new RunCoralIntake(() -> 0.3).withTimeout(2)
+            ),
+            new SequentialWristSetpoint(0)
+        ));
     }
 
     public Pose2d to2dPose(Pose3d pose3d) {

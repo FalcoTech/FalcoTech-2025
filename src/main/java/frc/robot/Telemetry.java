@@ -103,7 +103,7 @@ public class Telemetry {
     };
     
 
-    private final double[] m_poseArray = new double[3];
+    public static final double[] m_poseArray = new double[3];
     private final double[] m_moduleStatesArray = new double[8];
     private final double[] m_moduleTargetsArray = new double[8];
 

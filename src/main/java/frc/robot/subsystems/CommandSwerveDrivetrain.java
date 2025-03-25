@@ -16,6 +16,7 @@ import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 
 import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.numbers.N1;
@@ -31,6 +32,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.LimelightHelpers;
+import frc.robot.Telemetry;
 import frc.robot.LimelightHelpers.PoseEstimate;
 import frc.robot.generated.TunerConstants.TunerSwerveDrivetrain;
 
@@ -119,8 +121,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     /* The SysId routine to test */
     private SysIdRoutine m_sysIdRoutineToApply = m_sysIdRoutineTranslation;
-
-    private PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("");
 
     /**
      * Constructs a CTRE SwerveDrivetrain using the specified constants.
@@ -282,7 +282,12 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             });
         }
 
-        // addVisionMeasurement(mt2.pose, mt2.timestampSeconds);
+        
+        // if (!(Math.abs(getState().Speeds.omegaRadiansPerSecond) > Math.PI * 2) || !(mt2.tagCount == 0)){
+        //     addVisionMeasurement(mt2.pose, Utils.fpgaToCurrentTime(mt2.timestampSeconds),
+        //     VecBuilder.fill(.7, .7, 9999999));
+        // }
+
     }
 
     private void startSimThread() {
