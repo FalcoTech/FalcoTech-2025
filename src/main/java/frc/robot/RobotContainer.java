@@ -41,6 +41,7 @@ import frc.robot.commands.Elevator.RunElevator;
 import frc.robot.commands.Elevator.SequentialElevatorSetpoint;
 import frc.robot.commands.Elevator.SetElevatorToPosition;
 import frc.robot.commands.Swerve.AlignToNearestTagWithOffset;
+import frc.robot.commands.Swerve.RumbleCommand;
 import frc.robot.commands.Swerve.TeleOpDrive;
 import frc.robot.commands.Wrist.RunWrist;
 import frc.robot.commands.Wrist.SequentialWristSetpoint;
@@ -119,8 +120,12 @@ public class RobotContainer {
         // reset the field-centric heading on start button press
         pilot.start().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
-        pilot.povLeft().whileTrue(vision.pathfindToNearestAprilTag(false));
-        pilot.povRight().whileTrue(vision.pathfindToNearestAprilTag(true));
+        //align to nearest tag and if not interupted run RumbleCommand
+        
+        pilot.povLeft().whileTrue(new AlignToNearestTagWithOffset(false)
+                        .andThen(new RumbleCommand(Copilot, 0.5)));
+        pilot.povRight().whileTrue(new AlignToNearestTagWithOffset(true));
+        // pilot.povRight().whileTrue(new InstantCommand(() -> vision.pathfindToNearestAprilTag(true)));
         
         drivetrain.registerTelemetry(logger::telemeterize);
           
@@ -242,17 +247,17 @@ public class RobotContainer {
         ));
     }
 
-    public Pose2d to2dPose(Pose3d pose3d) {
-        // Extract x and y components from the Translation3d
-        Translation2d translation2d = new Translation2d(
-            pose3d.getX(),
-            pose3d.getY()
-        );
+    // public Pose2d to2dPose(Pose3d pose3d) {
+    //     // Extract x and y components from the Translation3d
+    //     Translation2d translation2d = new Translation2d(
+    //         pose3d.getX(),
+    //         pose3d.getY()
+    //     );
         
-        // Convert the rotation - we'll use the rotation around the Z axis
-        Rotation2d rotation2d = new Rotation2d(pose3d.getRotation().getZ());
+    //     // Convert the rotation - we'll use the rotation around the Z axis
+    //     Rotation2d rotation2d = new Rotation2d(pose3d.getRotation().getZ());
         
-        // Create and return a new Pose2d
-        return new Pose2d(translation2d, rotation2d);
-    }
+    //     // Create and return a new Pose2d
+    //     return new Pose2d(translation2d, rotation2d);
+    // }
 }
