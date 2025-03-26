@@ -40,7 +40,7 @@ import frc.robot.commands.Coral.RunCoralIntake;
 import frc.robot.commands.Elevator.RunElevator;
 import frc.robot.commands.Elevator.SequentialElevatorSetpoint;
 import frc.robot.commands.Elevator.SetElevatorToPosition;
-import frc.robot.commands.Swerve.AlignToNearestTagWithOffset;
+import frc.robot.commands.Swerve.RumbleCommand;
 import frc.robot.commands.Swerve.TeleOpDrive;
 import frc.robot.commands.Wrist.RunWrist;
 import frc.robot.commands.Wrist.SequentialWristSetpoint;
@@ -51,7 +51,7 @@ import frc.robot.subsystems.Climb;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.CoralIntake;
 import frc.robot.subsystems.Elevator;
-import frc.robot.subsystems.Vision;
+import frc.robot.subsystems.AlignmentSystem;
 import frc.robot.subsystems.Wrist;
 
 public class RobotContainer {
@@ -95,7 +95,7 @@ public class RobotContainer {
     public static final AlgaeIntake algaeIntake = new AlgaeIntake();
     public static final CoralIntake coralIntake = new CoralIntake();
     public static final Climb climb = new Climb();
-    public static final Vision vision = new Vision(drivetrain);
+    public static final AlignmentSystem tagAlign = new AlignmentSystem(drivetrain);
 
     public RobotContainer() {
         /* Put autonomous chooser on dashboard */
@@ -104,7 +104,7 @@ public class RobotContainer {
 
         // SmartDashboard.putData("Align to Tag", new AlignToNearestTagWithOffset(false));
         // SmartDashboard.putData("Algae Intake Pathfind", algaeScorePathfind);
-        SmartDashboard.putData("Pathfind to Nearest AprilTag", new InstantCommand(() -> vision.pathfindToNearestAprilTag(false).schedule()));
+        SmartDashboard.putData("Pathfind to Nearest AprilTag", new InstantCommand(() -> tagAlign.pathfindToNearestAprilTag(false).schedule()));
 
         configureBindings();
         RegisterNamedCommands();
@@ -119,8 +119,8 @@ public class RobotContainer {
         // reset the field-centric heading on start button press
         pilot.start().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
-        pilot.povLeft().whileTrue(vision.pathfindToNearestAprilTag(false));
-        pilot.povRight().whileTrue(vision.pathfindToNearestAprilTag(true));
+        pilot.povLeft().whileTrue(new InstantCommand(() -> tagAlign.pathfindToNearestAprilTag(false).schedule()).andThen(new RumbleCommand(pilot, 0.5)));
+        pilot.povRight().whileTrue(new InstantCommand(() -> tagAlign.pathfindToNearestAprilTag(true).schedule()));
         
         drivetrain.registerTelemetry(logger::telemeterize);
           
@@ -242,17 +242,17 @@ public class RobotContainer {
         ));
     }
 
-    public Pose2d to2dPose(Pose3d pose3d) {
-        // Extract x and y components from the Translation3d
-        Translation2d translation2d = new Translation2d(
-            pose3d.getX(),
-            pose3d.getY()
-        );
+    // public Pose2d to2dPose(Pose3d pose3d) {
+    //     // Extract x and y components from the Translation3d
+    //     Translation2d translation2d = new Translation2d(
+    //         pose3d.getX(),
+    //         pose3d.getY()
+    //     );
         
-        // Convert the rotation - we'll use the rotation around the Z axis
-        Rotation2d rotation2d = new Rotation2d(pose3d.getRotation().getZ());
+    //     // Convert the rotation - we'll use the rotation around the Z axis
+    //     Rotation2d rotation2d = new Rotation2d(pose3d.getRotation().getZ());
         
-        // Create and return a new Pose2d
-        return new Pose2d(translation2d, rotation2d);
-    }
+    //     // Create and return a new Pose2d
+    //     return new Pose2d(translation2d, rotation2d);
+    // }
 }
