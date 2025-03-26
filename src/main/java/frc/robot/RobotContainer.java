@@ -104,7 +104,7 @@ public class RobotContainer {
 
         // SmartDashboard.putData("Align to Tag", new AlignToNearestTagWithOffset(false));
         // SmartDashboard.putData("Algae Intake Pathfind", algaeScorePathfind);
-        SmartDashboard.putData("Pathfind to Nearest AprilTag", new InstantCommand(() -> tagAlign.pathfindToNearestAprilTag(false).schedule()));
+        SmartDashboard.putData("Pathfind to Nearest AprilTag", new InstantCommand(() -> tagAlign.pathfindToNearestAprilTagOld(false).schedule()));
 
         configureBindings();
         RegisterNamedCommands();
@@ -119,8 +119,8 @@ public class RobotContainer {
         // reset the field-centric heading on start button press
         pilot.start().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
-        pilot.povLeft().whileTrue(new InstantCommand(() -> tagAlign.pathfindToNearestAprilTag(false).schedule()).andThen(new RumbleCommand(pilot, 0.5)));
-        pilot.povRight().whileTrue(new InstantCommand(() -> tagAlign.pathfindToNearestAprilTag(true).schedule()));
+        pilot.povRight().whileTrue(tagAlign.pathfindToNearestAprilTag(true));
+        pilot.povLeft().whileTrue(tagAlign.pathfindToNearestAprilTag(false));
         
         drivetrain.registerTelemetry(logger::telemeterize);
           

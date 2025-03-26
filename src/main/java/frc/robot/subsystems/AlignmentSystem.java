@@ -5,6 +5,7 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.apriltag.*;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -16,6 +17,8 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.function.Supplier;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 
@@ -30,7 +33,6 @@ public class AlignmentSystem extends SubsystemBase {
   private final PathConstraints m_pathConstraints = RobotContainer.pathFindConstraints;
   private boolean offsetRight;
   private AprilTag targetTag;
-  private Pose2d currentPose;
   private Pose2d targetPose;
 
   double forwardDistance = -0.381;  // 15 inches in meters away from the tag
@@ -51,14 +53,14 @@ public class AlignmentSystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    this.currentPose = m_drivetrain.getState().Pose; 
+    // this.currentPose = m_drivetrain.getState().Pose; 
     // SmartDashboard.putString("currentPose", currentPose.toString());
 
     // SmartDashboard.putNumber("Nearest Tag ID", getNearestTag().ID);
 
   }
 
-  public Command pathfindToNearestAprilTag(boolean offsetRight){
+  public Command pathfindToNearestAprilTagOld(boolean offsetRight){
     this.offsetRight = offsetRight;
 
     targetTag = getNearestTag();
@@ -70,7 +72,6 @@ public class AlignmentSystem extends SubsystemBase {
   }
 
   public Pose2d getTargetPoseToNearestAprilTag(boolean offsetRight){
-    this.currentPose = m_drivetrain.getState().Pose;
     this.offsetRight = offsetRight;
 
     targetTag = getNearestTag();
@@ -123,12 +124,31 @@ public class AlignmentSystem extends SubsystemBase {
 
   }
 
+  private Pose2d getCurrentPose(){
+    return m_drivetrain.getState().Pose;
+  }
+
+  public Command pathfindToNearestAprilTag(boolean offsetRight) {
+    // Use a ProxyCommand to defer creation until execution time
+    return Commands.defer(
+      () -> {
+        // This lambda runs when the command is actually scheduled (button pressed)
+        this.offsetRight = offsetRight;
+        targetTag = getNearestTag();
+        targetPose = getTargetPose(targetTag);
+        
+        // Return the actual command to be run
+        return AutoBuilder.pathfindToPose(targetPose, m_pathConstraints, 0);
+    }, Set.of(this));
+  
+}
+
   private AprilTag getNearestTag(){
     AprilTag nearestTag = null;
     double nearestDistance = Double.MAX_VALUE;
     //loop through all reef tags in the field by reducing the number of tags to loop through
     for(AprilTag tag : reefTags){ 
-      double distance = currentPose.getTranslation().getDistance(tag.pose.toPose2d().getTranslation());
+      double distance = getCurrentPose().getTranslation().getDistance(tag.pose.toPose2d().getTranslation());
       SmartDashboard.putNumber("Tag " + tag.ID + " Distance", distance);
       if (distance < nearestDistance){
         nearestDistance = distance;

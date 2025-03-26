@@ -1,12 +1,7 @@
 {
-  "Keyboard 0 Settings": {
+  "System Joysticks": {
     "window": {
-      "visible": true
-    }
-  },
-  "Keyboard 1 Settings": {
-    "window": {
-      "visible": true
+      "visible": false
     }
   },
   "keyboardJoysticks": [
@@ -38,19 +33,19 @@
         86,
         66,
         78,
-        77,
+        -1,
         44
       ],
       "povConfig": [
         {
-          "key0": 328,
-          "key135": 323,
-          "key180": 322,
-          "key225": 321,
-          "key270": 324,
-          "key315": 327,
-          "key45": 329,
-          "key90": 326
+          "key0": 56,
+          "key135": 51,
+          "key180": 50,
+          "key225": 49,
+          "key270": 52,
+          "key315": 55,
+          "key45": 57,
+          "key90": 54
         }
       ],
       "povCount": 1
@@ -64,15 +59,23 @@
         {
           "decKey": 73,
           "incKey": 75
+        },
+        {
+          "decKey": 79,
+          "incKey": 85
+        },
+        {
+          "decKey": 46,
+          "incKey": 77
         }
       ],
-      "axisCount": 2,
+      "axisCount": 4,
       "buttonCount": 4,
       "buttonKeys": [
-        -1,
-        -1,
-        46,
-        47
+        59,
+        91,
+        93,
+        39
       ],
       "povCount": 0
     },
