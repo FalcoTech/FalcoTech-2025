@@ -119,8 +119,8 @@ public class RobotContainer {
         // reset the field-centric heading on start button press
         pilot.start().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
-        pilot.povRight().whileTrue(tagAlign.pathfindToNearestAprilTag(true));
-        pilot.povLeft().whileTrue(tagAlign.pathfindToNearestAprilTag(false));
+        pilot.b().whileTrue(tagAlign.pathfindToNearestAprilTag(true));
+        pilot.x().whileTrue(tagAlign.pathfindToNearestAprilTag(false));
         
         drivetrain.registerTelemetry(logger::telemeterize);
           
@@ -155,7 +155,7 @@ public class RobotContainer {
 
         //ELEVATOR SETPOINTS
         //
-        Copilot.povDown().onTrue(
+        Copilot.povDown().onTrue( //Home position (does work)
             new SequentialCommandGroup(
                 elevator.GetLeftElevatorPosition() > 1 && elevator.GetLeftElevatorPosition() < 4.5 && wrist.GetWristEncoderPosition() > 18 ? 
                    new SequentialCommandGroup(
@@ -170,7 +170,7 @@ public class RobotContainer {
             )
         );
         
-        Copilot.x().onTrue(new SequentialCommandGroup( //L2 SCORING
+        Copilot.x().onTrue(new SequentialCommandGroup( //L2 CORAL SCORING
             new SequentialElevatorSetpoint(8),
             new ParallelCommandGroup(
                 new SetElevatorToPosition(8),
@@ -188,7 +188,7 @@ public class RobotContainer {
 
         Copilot.a().and(Copilot.x()).onTrue(new ParallelCommandGroup(
             new SetElevatorToPosition(12),
-            new SetWristToPosition(12.5) //check this value
+            new SetWristToPosition(12.5) //this one should be good 
         ));
         Copilot.a().and(Copilot.y()).onTrue(new ParallelCommandGroup(
             new SetElevatorToPosition(14.6),
@@ -215,7 +215,7 @@ public class RobotContainer {
             )
         ));
 
-        Copilot.back().onTrue(new SequentialCommandGroup(new RunCoralIntake(() -> -.2).withTimeout(.15), new RunCoralIntake(() -> .2).withTimeout(.2), new RunCoralIntake(() -> -.2).withTimeout(.15), new RunCoralIntake(() -> .2).withTimeout(.2), new RunCoralIntake(() -> 0.0).withTimeout(0.15)));
+        Copilot.back().onTrue(new SequentialCommandGroup(new RunCoralIntake(() -> -.2).withTimeout(.15), new RunCoralIntake(() -> .2).withTimeout(.15), new RunCoralIntake(() -> -.2).withTimeout(.15), new RunCoralIntake(() -> .2).withTimeout(.15), new RunCoralIntake(() -> 0.0).withTimeout(0.15)));
     }
 
     public Command getAutonomousCommand() {
