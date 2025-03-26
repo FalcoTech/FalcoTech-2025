@@ -61,6 +61,7 @@ public class Vision extends SubsystemBase {
     reefTags = new ArrayList<AprilTag>();
     reefTags.addAll(field.getTags().subList(6,11));
     reefTags.addAll(field.getTags().subList(17,22));
+    this.offsetRight = offsetRight;
 
     currentPose = getCurrentPose();
 
