@@ -16,6 +16,8 @@ import com.pathplanner.lib.path.PathConstraints;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
@@ -38,6 +40,7 @@ import frc.robot.commands.Coral.RunCoralIntake;
 import frc.robot.commands.Elevator.RunElevator;
 import frc.robot.commands.Elevator.SequentialElevatorSetpoint;
 import frc.robot.commands.Elevator.SetElevatorToPosition;
+import frc.robot.commands.Swerve.AlignToNearestTagWithOffset;
 import frc.robot.commands.Swerve.TeleOpDrive;
 import frc.robot.commands.Wrist.RunWrist;
 import frc.robot.commands.Wrist.SequentialWristSetpoint;
@@ -48,6 +51,7 @@ import frc.robot.subsystems.Climb;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.CoralIntake;
 import frc.robot.subsystems.Elevator;
+import frc.robot.subsystems.Vision;
 import frc.robot.subsystems.Wrist;
 
 public class RobotContainer {
@@ -78,9 +82,9 @@ public class RobotContainer {
     private final Pose2d leftFeederTargetPose = new Pose2d(1.14, 6.93, Rotation2d.fromDegrees(127.16));
     private final Pose2d algaeScoreTargerPose = new Pose2d(5.98, .58, Rotation2d.fromDegrees(-90));
 
-    private final PathConstraints pathFindConstraints = new PathConstraints(MaxSpeed, 4, MaxAngularRate, Units.degreesToRadians(540));
+    public static final PathConstraints pathFindConstraints = new PathConstraints(MaxSpeed, 4, MaxAngularRate, Units.degreesToRadians(540));
     private final Command leftFeederPathfind = AutoBuilder.pathfindToPose(leftFeederTargetPose, pathFindConstraints, 1);
-    private final Command algaeScoreCommand = AutoBuilder.pathfindToPose(algaeScoreTargerPose, pathFindConstraints, 1);
+    private final Command algaeScorePathfind = AutoBuilder.pathfindToPose(algaeScoreTargerPose, pathFindConstraints, 1);
     
     private final SendableChooser<Command> autoChooser;
 
@@ -91,11 +95,16 @@ public class RobotContainer {
     public static final AlgaeIntake algaeIntake = new AlgaeIntake();
     public static final CoralIntake coralIntake = new CoralIntake();
     public static final Climb climb = new Climb();
+    public static final Vision vision = new Vision(drivetrain);
 
     public RobotContainer() {
         /* Put autonomous chooser on dashboard */
         autoChooser = AutoBuilder.buildAutoChooser("Tests");
         SmartDashboard.putData("Auto Mode", autoChooser);
+
+        // SmartDashboard.putData("Align to Tag", new AlignToNearestTagWithOffset(false));
+        // SmartDashboard.putData("Algae Intake Pathfind", algaeScorePathfind);
+        SmartDashboard.putData("Pathfind to Nearest AprilTag", new InstantCommand(() -> vision.pathfindToNearestAprilTag(false).schedule()));
 
         configureBindings();
         RegisterNamedCommands();
@@ -109,6 +118,9 @@ public class RobotContainer {
 
         // reset the field-centric heading on start button press
         pilot.start().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+
+        pilot.povLeft().whileTrue(vision.pathfindToNearestAprilTag(false));
+        pilot.povRight().whileTrue(vision.pathfindToNearestAprilTag(true));
         
         drivetrain.registerTelemetry(logger::telemeterize);
           
@@ -127,7 +139,7 @@ public class RobotContainer {
         
         //ALGAE INTAKE
         Copilot.leftBumper().whileTrue(new RunAlgaeIntake(() -> 1.0));
-        Copilot.rightBumper().whileTrue(new RunAlgaeIntake(() -> -.3)).onFalse(new RunAlgaeIntake(() -> 1.0).withTimeout(2));
+        Copilot.rightBumper().whileTrue(new RunAlgaeIntake(() -> -.2)).onFalse(new RunAlgaeIntake(() -> 1.0).withTimeout(1));
 
 
         //CORAL INTAKE
@@ -145,10 +157,11 @@ public class RobotContainer {
         //
         Copilot.povDown().onTrue(
             new SequentialCommandGroup(
-                elevator.GetLeftElevatorPosition() > 1 && elevator.GetLeftElevatorPosition() < 4 && wrist.GetWristEncoderPosition() > 19 ? 
+                elevator.GetLeftElevatorPosition() > 1 && elevator.GetLeftElevatorPosition() < 4.5 && wrist.GetWristEncoderPosition() > 18 ? 
                    new SequentialCommandGroup(
-                       new SequentialElevatorSetpoint(4), 
-                       new ParallelDeadlineGroup(new SetWristToPosition(0), new SetElevatorToPosition(4))
+                       new SequentialElevatorSetpoint(6), 
+                       new ParallelDeadlineGroup(new SetWristToPosition(0), new SetElevatorToPosition(6)),
+                       new InstantCommand(() -> elevator.StopElevator())
                    ) : 
                    new ParallelDeadlineGroup(
                        new SetWristToPosition(0),
@@ -159,7 +172,7 @@ public class RobotContainer {
         
         Copilot.x().onTrue(new SequentialCommandGroup( //L2 SCORING
             new SequentialElevatorSetpoint(8),
-            new ParallelRaceGroup(
+            new ParallelCommandGroup(
                 new SetElevatorToPosition(8),
                 new SetWristToPosition(5.8)
             )
@@ -167,14 +180,28 @@ public class RobotContainer {
 
         Copilot.y().onTrue(new SequentialCommandGroup( //L3 SCORING
             new SequentialElevatorSetpoint(14.8),
-            new ParallelRaceGroup(
+            new ParallelCommandGroup(
                 new SetElevatorToPosition(14.8),
                 new SetWristToPosition(5.8)
             )
         ));
+
+        Copilot.a().and(Copilot.x()).onTrue(new ParallelCommandGroup(
+            new SetElevatorToPosition(12),
+            new SetWristToPosition(12.5) //check this value
+        ));
+        Copilot.a().and(Copilot.y()).onTrue(new ParallelCommandGroup(
+            new SetElevatorToPosition(14.6),
+            new SetWristToPosition(10) //check this value
+        ));
+        Copilot.a().and(Copilot.b()).onTrue(new ParallelCommandGroup(
+            new SetElevatorToPosition(24.7),
+            new SetWristToPosition(3) //check this value
+        ));
+
         // Copilot.povRight().onTrue(new SequentialCommandGroup( //L4 SCORING VALUES
         // new SequentialElevatorSetpoint(20),
-        // new ParallelRaceGroup(
+        // new ParallelCommandGroup(
         //     new SetElevatorToPosition(20),
         //     new SetWristToPosition(5.8) 
         // )
@@ -182,13 +209,13 @@ public class RobotContainer {
 
         Copilot.povUp().onTrue(new SequentialCommandGroup( //CORAL STATION VALUES
             new SequentialElevatorSetpoint(12.8),
-            new ParallelRaceGroup(
+            new ParallelCommandGroup(
                 new SetElevatorToPosition(12.8),
                 new SetWristToPosition(20.1) 
             )
         ));
 
-        // Copilot.povRight().onTrue(new SequentialCommandGroup(new RunCoralIntake(() -> -.1).withTimeout(.15), new RunCoralIntake(() -> .1).withTimeout(.15), new RunCoralIntake(() -> -.1).withTimeout(.15), new RunCoralIntake(() -> .1).withTimeout(.15), new RunCoralIntake(() -> 0.0).withTimeout(0.15)));
+        Copilot.back().onTrue(new SequentialCommandGroup(new RunCoralIntake(() -> -.2).withTimeout(.15), new RunCoralIntake(() -> .2).withTimeout(.2), new RunCoralIntake(() -> -.2).withTimeout(.15), new RunCoralIntake(() -> .2).withTimeout(.2), new RunCoralIntake(() -> 0.0).withTimeout(0.15)));
     }
 
     public Command getAutonomousCommand() {
@@ -198,7 +225,7 @@ public class RobotContainer {
 
     private void RegisterNamedCommands(){
         /* Pathplanner named commands for the pathplanner app. TODO: make this a function */
-        NamedCommands.registerCommand("TestCommand", algaeScoreCommand);
+        NamedCommands.registerCommand("TestCommand", algaeScorePathfind);
 
         NamedCommands.registerCommand("Elevator L3 Score", new SequentialCommandGroup(
             new SequentialElevatorSetpoint(14.8),
@@ -213,5 +240,19 @@ public class RobotContainer {
             ),
             new SequentialWristSetpoint(0)
         ));
+    }
+
+    public Pose2d to2dPose(Pose3d pose3d) {
+        // Extract x and y components from the Translation3d
+        Translation2d translation2d = new Translation2d(
+            pose3d.getX(),
+            pose3d.getY()
+        );
+        
+        // Convert the rotation - we'll use the rotation around the Z axis
+        Rotation2d rotation2d = new Rotation2d(pose3d.getRotation().getZ());
+        
+        // Create and return a new Pose2d
+        return new Pose2d(translation2d, rotation2d);
     }
 }

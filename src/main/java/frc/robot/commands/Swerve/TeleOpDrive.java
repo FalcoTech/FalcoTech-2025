@@ -12,6 +12,7 @@ import frc.robot.subsystems.CommandSwerveDrivetrain;
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class TeleOpDrive extends Command {
   /** Creates a new TeleOpDrive. */
+
   private final CommandSwerveDrivetrain m_drivetrain = RobotContainer.drivetrain;
   public TeleOpDrive() {
     // Use addRequirements() here to declare subsystem dependencies.
@@ -34,6 +35,7 @@ public class TeleOpDrive extends Command {
     :
     RobotContainer.drive
         .withVelocityX((-RobotContainer.pilot.getLeftY() * (RobotContainer.pilot.leftBumper().getAsBoolean() ? .2 : 1)) * (RobotContainer.MaxSpeed * .5)) // Drive forward with negative Y (forward)
+        // .withVelocityX((-0.2 * (RobotContainer.pilot.leftBumper().getAsBoolean() ? .2 : 1)) * (RobotContainer.MaxSpeed * .5)) // Drive forward with negative Y (forward)
         .withVelocityY((-RobotContainer.pilot.getLeftX() * (RobotContainer.pilot.leftBumper().getAsBoolean() ? .2 : 1)) * (RobotContainer.MaxSpeed * .5)) // Drive left with negative X (left)
         .withRotationalRate((-RobotContainer.pilot.getRightX() * (RobotContainer.pilot.leftBumper().getAsBoolean() ? .2 : 1)) * (RobotContainer.MaxSpeed * .5)) 
   );
