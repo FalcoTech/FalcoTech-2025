@@ -104,7 +104,7 @@ public class RobotContainer {
 
         // SmartDashboard.putData("Align to Tag", new AlignToNearestTagWithOffset(false));
         // SmartDashboard.putData("Algae Intake Pathfind", algaeScorePathfind);
-        SmartDashboard.putData("Pathfind to Nearest AprilTag", new InstantCommand(() -> vision.pathfindToNearestAprilTag(true).schedule()));
+        SmartDashboard.putData("Pathfind to Nearest AprilTag", new InstantCommand(() -> vision.pathfindToNearestAprilTag(false).schedule()));
 
         configureBindings();
         RegisterNamedCommands();
@@ -139,7 +139,7 @@ public class RobotContainer {
         
         //ALGAE INTAKE
         Copilot.leftBumper().whileTrue(new RunAlgaeIntake(() -> 1.0));
-        Copilot.rightBumper().whileTrue(new RunAlgaeIntake(() -> -.3)).onFalse(new RunAlgaeIntake(() -> 1.0).withTimeout(2));
+        Copilot.rightBumper().whileTrue(new RunAlgaeIntake(() -> -.2)).onFalse(new RunAlgaeIntake(() -> 1.0).withTimeout(1));
 
 
         //CORAL INTAKE
@@ -157,10 +157,11 @@ public class RobotContainer {
         //
         Copilot.povDown().onTrue(
             new SequentialCommandGroup(
-                elevator.GetLeftElevatorPosition() > 1 && elevator.GetLeftElevatorPosition() < 4 && wrist.GetWristEncoderPosition() > 19 ? 
+                elevator.GetLeftElevatorPosition() > 1 && elevator.GetLeftElevatorPosition() < 4.5 && wrist.GetWristEncoderPosition() > 18 ? 
                    new SequentialCommandGroup(
-                       new SequentialElevatorSetpoint(4), 
-                       new ParallelDeadlineGroup(new SetWristToPosition(0), new SetElevatorToPosition(4))
+                       new SequentialElevatorSetpoint(6), 
+                       new ParallelDeadlineGroup(new SetWristToPosition(0), new SetElevatorToPosition(6)),
+                       new InstantCommand(() -> elevator.StopElevator())
                    ) : 
                    new ParallelDeadlineGroup(
                        new SetWristToPosition(0),
@@ -171,7 +172,7 @@ public class RobotContainer {
         
         Copilot.x().onTrue(new SequentialCommandGroup( //L2 SCORING
             new SequentialElevatorSetpoint(8),
-            new ParallelRaceGroup(
+            new ParallelCommandGroup(
                 new SetElevatorToPosition(8),
                 new SetWristToPosition(5.8)
             )
@@ -179,14 +180,28 @@ public class RobotContainer {
 
         Copilot.y().onTrue(new SequentialCommandGroup( //L3 SCORING
             new SequentialElevatorSetpoint(14.8),
-            new ParallelRaceGroup(
+            new ParallelCommandGroup(
                 new SetElevatorToPosition(14.8),
                 new SetWristToPosition(5.8)
             )
         ));
+
+        Copilot.a().and(Copilot.x()).onTrue(new ParallelCommandGroup(
+            new SetElevatorToPosition(12),
+            new SetWristToPosition(12.5) //check this value
+        ));
+        Copilot.a().and(Copilot.y()).onTrue(new ParallelCommandGroup(
+            new SetElevatorToPosition(14.6),
+            new SetWristToPosition(10) //check this value
+        ));
+        Copilot.a().and(Copilot.b()).onTrue(new ParallelCommandGroup(
+            new SetElevatorToPosition(24.7),
+            new SetWristToPosition(3) //check this value
+        ));
+
         // Copilot.povRight().onTrue(new SequentialCommandGroup( //L4 SCORING VALUES
         // new SequentialElevatorSetpoint(20),
-        // new ParallelRaceGroup(
+        // new ParallelCommandGroup(
         //     new SetElevatorToPosition(20),
         //     new SetWristToPosition(5.8) 
         // )
@@ -194,13 +209,13 @@ public class RobotContainer {
 
         Copilot.povUp().onTrue(new SequentialCommandGroup( //CORAL STATION VALUES
             new SequentialElevatorSetpoint(12.8),
-            new ParallelRaceGroup(
+            new ParallelCommandGroup(
                 new SetElevatorToPosition(12.8),
                 new SetWristToPosition(20.1) 
             )
         ));
 
-        // Copilot.povRight().onTrue(new SequentialCommandGroup(new RunCoralIntake(() -> -.1).withTimeout(.15), new RunCoralIntake(() -> .1).withTimeout(.15), new RunCoralIntake(() -> -.1).withTimeout(.15), new RunCoralIntake(() -> .1).withTimeout(.15), new RunCoralIntake(() -> 0.0).withTimeout(0.15)));
+        Copilot.back().onTrue(new SequentialCommandGroup(new RunCoralIntake(() -> -.2).withTimeout(.15), new RunCoralIntake(() -> .2).withTimeout(.2), new RunCoralIntake(() -> -.2).withTimeout(.15), new RunCoralIntake(() -> .2).withTimeout(.2), new RunCoralIntake(() -> 0.0).withTimeout(0.15)));
     }
 
     public Command getAutonomousCommand() {

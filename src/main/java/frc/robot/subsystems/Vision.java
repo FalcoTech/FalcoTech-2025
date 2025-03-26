@@ -53,7 +53,6 @@ public class Vision extends SubsystemBase {
     // This method will be called once per scheduler run
     //Shouldn't this be here?
     //not really because once I run the command it should update to where the robot is I'll try it tho
-    SmartDashboard.putString("currentPose", currentPose.toString());  
     // this.currentPose = m_drivetrain.getState().Pose; 
   }
 
@@ -66,10 +65,8 @@ public class Vision extends SubsystemBase {
     currentPose = getCurrentPose();
 
     targetTag = getNearestTag();
-    SmartDashboard.putNumber("Nearest Tag ID", targetTag.ID);
     targetPose = getTargetPose(targetTag);
 
-    SmartDashboard.putString("AprilTag Target Pose", targetPose.toString());
 
     return AutoBuilder.pathfindToPose(targetPose, m_pathConstraints, 0);
   }
@@ -121,7 +118,6 @@ public class Vision extends SubsystemBase {
     // Get the current pose of the robot
     Pose2d currentPose = m_drivetrain.getState().Pose;
     // print out the current pose for debugging
-    SmartDashboard.putString("Current Pose", currentPose.toString());
     return currentPose;
   }
 

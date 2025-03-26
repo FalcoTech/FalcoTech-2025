@@ -4,6 +4,8 @@
 
 package frc.robot.commands.Elevator;
 
+import java.util.function.Supplier;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.Elevator;
@@ -17,6 +19,11 @@ public class SetElevatorToPosition extends Command {
   public SetElevatorToPosition(double position) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.Position = position;
+    addRequirements(m_Elevator);
+  }
+
+  public SetElevatorToPosition(Supplier<Double> supplierPosition){
+    this.Position = supplierPosition.get();
     addRequirements(m_Elevator);
   }
 
