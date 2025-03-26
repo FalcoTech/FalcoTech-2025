@@ -24,7 +24,7 @@ import com.pathplanner.lib.path.PathConstraints;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 
-public class Vision extends SubsystemBase {
+public class AlignmentSystem extends SubsystemBase {
   // private final CommandSwerveDrivetrain m_drivetrain = RobotContainer.drivetrain;
   private CommandSwerveDrivetrain m_drivetrain;
   private final PathConstraints m_pathConstraints = RobotContainer.pathFindConstraints;
@@ -40,8 +40,8 @@ public class Vision extends SubsystemBase {
   private List<AprilTag> reefTags;
   AprilTagFieldLayout field = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);
   
-  /** Creates a new Vision. */
-  public Vision(CommandSwerveDrivetrain drivetrain) {
+  /** Creates a new AlignmentSystem. */
+  public AlignmentSystem(CommandSwerveDrivetrain drivetrain) {
     this.m_drivetrain = drivetrain;
     reefTags = new ArrayList<AprilTag>();
     reefTags.addAll(field.getTags().subList(6,11));
@@ -67,6 +67,16 @@ public class Vision extends SubsystemBase {
     // SmartDashboard.putString("AprilTag Target Pose", targetPose.toString());
 
     return AutoBuilder.pathfindToPose(targetPose, m_pathConstraints, 0);
+  }
+
+  public Pose2d getTargetPoseToNearestAprilTag(boolean offsetRight){
+    this.currentPose = m_drivetrain.getState().Pose;
+    this.offsetRight = offsetRight;
+
+    targetTag = getNearestTag();
+    targetPose = getTargetPose(targetTag);
+
+    return targetPose;
   }
 
   private Pose2d getTargetPose(AprilTag targetTag){
