@@ -97,7 +97,26 @@ public class RobotContainer {
     public static final Climb climb = new Climb();
     public static final AlignmentSystem tagAlign = new AlignmentSystem(drivetrain);
 
+    private void RegisterNamedCommands(){
+        /* Pathplanner named commands for the pathplanner app. TODO: make this a function */
+        NamedCommands.registerCommand("TestCommand", algaeScorePathfind);
+
+        NamedCommands.registerCommand("Elevator L3 Score", new SequentialCommandGroup(
+            new SequentialElevatorSetpoint(14.8),
+            new ParallelRaceGroup(
+                new SetElevatorToPosition(14.8),
+                new SequentialWristSetpoint(5.8)
+            ),
+            new ParallelRaceGroup(
+                new SetElevatorToPosition(14.8),
+                new SetWristToPosition(5.8),
+                new RunCoralIntake(() -> 0.3).withTimeout(2)
+            ),
+            new SequentialWristSetpoint(0)
+        ));
+    }
     public RobotContainer() {
+        
         /* Put autonomous chooser on dashboard */
         autoChooser = AutoBuilder.buildAutoChooser("Tests");
         SmartDashboard.putData("Auto Mode", autoChooser);
@@ -223,23 +242,7 @@ public class RobotContainer {
         return autoChooser.getSelected();
     }
 
-    private void RegisterNamedCommands(){
-        /* Pathplanner named commands for the pathplanner app. TODO: make this a function */
-        NamedCommands.registerCommand("TestCommand", algaeScorePathfind);
-
-        NamedCommands.registerCommand("Elevator L3 Score", new SequentialCommandGroup(
-            new SequentialElevatorSetpoint(14.8),
-            new ParallelRaceGroup(
-                new SetElevatorToPosition(14.8),
-                new SequentialWristSetpoint(5.8)
-            ),
-            new ParallelRaceGroup(
-                new SetElevatorToPosition(14.8),
-                new SetWristToPosition(5.8),
-                new RunCoralIntake(() -> 0.3).withTimeout(2)
-            ),
-            new SequentialWristSetpoint(0)
-        ));
+  
     }
 
     // public Pose2d to2dPose(Pose3d pose3d) {
@@ -255,4 +258,3 @@ public class RobotContainer {
     //     // Create and return a new Pose2d
     //     return new Pose2d(translation2d, rotation2d);
     // }
-}
