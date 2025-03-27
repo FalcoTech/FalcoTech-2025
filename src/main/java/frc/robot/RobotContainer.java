@@ -187,6 +187,14 @@ public class RobotContainer {
             )
         ));
 
+        Copilot.b().onTrue(new SequentialCommandGroup( //L4 SCORING
+             new SequentialElevatorSetpoint(26),
+            new ParallelCommandGroup(
+                new SetElevatorToPosition(26),
+                new SetWristToPosition(5.8)
+            )
+        ));
+
         Copilot.a().and(Copilot.x()).onTrue(new ParallelCommandGroup(
             new SetElevatorToPosition(12),
             new SetWristToPosition(12.5) //this one should be good 
