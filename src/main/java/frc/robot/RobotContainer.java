@@ -99,6 +99,8 @@ public class RobotContainer {
 
     public RobotContainer() {
         /* Put autonomous chooser on dashboard */
+        RegisterNamedCommands();
+        
         autoChooser = AutoBuilder.buildAutoChooser("Tests");
         SmartDashboard.putData("Auto Mode", autoChooser);
 
@@ -107,7 +109,6 @@ public class RobotContainer {
         SmartDashboard.putData("Pathfind to Nearest AprilTag", new InstantCommand(() -> tagAlign.pathfindToNearestAprilTagOld(false).schedule()));
 
         configureBindings();
-        RegisterNamedCommands();
     }
 
     private void configureBindings() {
@@ -227,7 +228,11 @@ public class RobotContainer {
         /* Pathplanner named commands for the pathplanner app. TODO: make this a function */
         NamedCommands.registerCommand("TestCommand", algaeScorePathfind);
 
-        NamedCommands.registerCommand("Elevator L3 Score", new SequentialCommandGroup(
+        NamedCommands.registerCommand("Elevator L3 Score", ElevatorL3Score());
+    }
+
+    public Command ElevatorL3Score(){
+        return new SequentialCommandGroup(
             new SequentialElevatorSetpoint(14.8),
             new ParallelRaceGroup(
                 new SetElevatorToPosition(14.8),
@@ -239,7 +244,7 @@ public class RobotContainer {
                 new RunCoralIntake(() -> 0.3).withTimeout(2)
             ),
             new SequentialWristSetpoint(0)
-        ));
+        );
     }
 
     // public Pose2d to2dPose(Pose3d pose3d) {
