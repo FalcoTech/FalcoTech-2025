@@ -45,6 +45,8 @@ public class Elevator extends SubsystemBase {
     // RightElevatorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     LeftElevatorConfig.idleMode(IdleMode.kBrake);
     RightElevatorConfig.idleMode(IdleMode.kBrake);
+    LeftElevatorConfig.voltageCompensation(12);
+    RightElevatorConfig.voltageCompensation(12);
 
     RightElevatorConfig.follow(20, true);
 

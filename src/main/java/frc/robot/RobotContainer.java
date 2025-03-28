@@ -144,7 +144,7 @@ public class RobotContainer {
 
 
         //CORAL INTAKE
-        coralIntake.setDefaultCommand(new RunCoralIntake(()-> Copilot.getLeftTriggerAxis()-Copilot.getRightTriggerAxis()));
+        coralIntake.setDefaultCommand(new RunCoralIntake(()-> Copilot.getRightTriggerAxis()-Copilot.getLeftTriggerAxis()));
         // Copilot.povRight().whileTrue(new CenterCoral());
 
         //WRIST

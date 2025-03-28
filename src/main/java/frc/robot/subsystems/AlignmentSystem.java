@@ -46,8 +46,8 @@ public class AlignmentSystem extends SubsystemBase {
   public AlignmentSystem(CommandSwerveDrivetrain drivetrain) {
     this.m_drivetrain = drivetrain;
     reefTags = new ArrayList<AprilTag>();
-    reefTags.addAll(field.getTags().subList(6,11));
-    reefTags.addAll(field.getTags().subList(17,22));
+    reefTags.addAll(field.getTags().subList(5,11));
+    reefTags.addAll(field.getTags().subList(16,22));
     
   }
 
