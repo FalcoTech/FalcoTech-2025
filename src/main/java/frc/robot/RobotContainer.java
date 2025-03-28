@@ -4,24 +4,19 @@
 
 package frc.robot;
 
-import static edu.wpi.first.units.Units.*;
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
-import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveModule.SteerRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
-
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.path.PathConstraints;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.util.sendable.Sendable;
-import edu.wpi.first.util.sendable.SendableBuilder;
-import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -30,28 +25,23 @@ import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.commands.Algae.RunAlgaeIntake;
-import frc.robot.commands.Coral.CenterCoral;
 import frc.robot.commands.Coral.RunCoralIntake;
 import frc.robot.commands.Elevator.RunElevator;
 import frc.robot.commands.Elevator.SequentialElevatorSetpoint;
 import frc.robot.commands.Elevator.SetElevatorToPosition;
-import frc.robot.commands.Swerve.RumbleCommand;
 import frc.robot.commands.Swerve.TeleOpDrive;
 import frc.robot.commands.Wrist.RunWrist;
 import frc.robot.commands.Wrist.SequentialWristSetpoint;
 import frc.robot.commands.Wrist.SetWristToPosition;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.AlgaeIntake;
+import frc.robot.subsystems.AlignmentSystem;
 import frc.robot.subsystems.Climb;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.CoralIntake;
 import frc.robot.subsystems.Elevator;
-import frc.robot.subsystems.AlignmentSystem;
 import frc.robot.subsystems.Wrist;
 
 public class RobotContainer {
@@ -140,7 +130,7 @@ public class RobotContainer {
         
         //ALGAE INTAKE
         Copilot.leftBumper().whileTrue(new RunAlgaeIntake(() -> 1.0));
-        Copilot.rightBumper().whileTrue(new RunAlgaeIntake(() -> -.2)).onFalse(new RunAlgaeIntake(() -> 1.0).withTimeout(1));
+        Copilot.rightBumper().whileTrue(new RunAlgaeIntake(() -> -.5)).onFalse(new RunAlgaeIntake(() -> 1.0).withTimeout(1));
 
 
         //CORAL INTAKE
@@ -197,16 +187,26 @@ public class RobotContainer {
 
         Copilot.a().and(Copilot.x()).onTrue(new ParallelCommandGroup(
             new SetElevatorToPosition(12),
-            new SetWristToPosition(12.5) //this one should be good 
+            new SetWristToPosition(12.5) //L2 
         ));
         Copilot.a().and(Copilot.y()).onTrue(new ParallelCommandGroup(
-            new SetElevatorToPosition(14.6),
-            new SetWristToPosition(10) //check this value
+            new SetElevatorToPosition(17
+            ),
+            new SetWristToPosition(10) //L3
         ));
         Copilot.a().and(Copilot.b()).onTrue(new ParallelCommandGroup(
             new SetElevatorToPosition(24.7),
-            new SetWristToPosition(3) //check this value
+            new SetWristToPosition(3) //Barge
         ));
+        Copilot.a().and(Copilot.povUp()).onTrue(new ParallelCommandGroup(
+            new SetElevatorToPosition(5),
+            new SetWristToPosition(12) //Algae Processor
+        ));
+        Copilot.a().and(Copilot.povDown()).onTrue(new ParallelCommandGroup(
+            new SetElevatorToPosition(1),
+            new SetWristToPosition(12) //Algae Floor Load
+        ));
+    
 
         // Copilot.povRight().onTrue(new SequentialCommandGroup( //L4 SCORING VALUES
         // new SequentialElevatorSetpoint(20),
@@ -216,10 +216,10 @@ public class RobotContainer {
         // )
         // ));
 
-        Copilot.povUp().onTrue(new SequentialCommandGroup( //CORAL STATION VALUES
-            new SequentialElevatorSetpoint(12.8),
+        Copilot.povUp().and(Copilot.a().negate()).onTrue(new SequentialCommandGroup( //CORAL STATION VALUES
+            new SequentialElevatorSetpoint(13.5),
             new ParallelCommandGroup(
-                new SetElevatorToPosition(12.8),
+                new SetElevatorToPosition(13.5),
                 new SetWristToPosition(20.1) 
             )
         ));
@@ -237,6 +237,8 @@ public class RobotContainer {
         NamedCommands.registerCommand("TestCommand", algaeScorePathfind);
 
         NamedCommands.registerCommand("Elevator L3 Score", ElevatorL3Score());
+
+        NamedCommands.registerCommand("Elevator L4 Score", ElevatorL4Score());
     }
 
     public Command ElevatorL3Score(){
@@ -254,6 +256,23 @@ public class RobotContainer {
             new SequentialWristSetpoint(0)
         );
     }
+
+    public Command ElevatorL4Score(){
+        return new SequentialCommandGroup(
+            new SequentialElevatorSetpoint(26),
+            new ParallelRaceGroup(
+                new SetElevatorToPosition(26),
+                new SequentialWristSetpoint(5.8)
+            ),
+            new ParallelRaceGroup(
+                new SetElevatorToPosition(26),
+                new SetWristToPosition(5.8),
+                new RunCoralIntake(() -> 0.3).withTimeout(2)
+            ),
+            new SequentialWristSetpoint(0)
+        );
+    }
+
 
     // public Pose2d to2dPose(Pose3d pose3d) {
     //     // Extract x and y components from the Translation3d
