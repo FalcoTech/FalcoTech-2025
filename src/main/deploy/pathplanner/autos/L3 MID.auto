@@ -7,7 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "L3 MID"
+            "pathName": "L3 MID path"
           }
         },
         {
@@ -19,7 +19,7 @@
       ]
     }
   },
-  "resetOdom": true,
+  "resetOdom": false,
   "folder": null,
   "choreoAuto": false
 }
