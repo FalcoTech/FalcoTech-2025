@@ -239,6 +239,7 @@ public class RobotContainer {
         NamedCommands.registerCommand("Elevator L3 Score", ElevatorL3Score());
 
         NamedCommands.registerCommand("Elevator L4 Score", ElevatorL4Score());
+        NamedCommands.registerCommand("Drive to Nearest Right Reef", tagAlign.pathfindToNearestCoralReefAprilTag(true));
     }
 
     public Command ElevatorL3Score(){
