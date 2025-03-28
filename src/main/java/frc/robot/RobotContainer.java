@@ -110,8 +110,11 @@ public class RobotContainer {
         // reset the field-centric heading on start button press
         pilot.start().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
-        pilot.b().whileTrue(tagAlign.pathfindToNearestAprilTag(true));
-        pilot.x().whileTrue(tagAlign.pathfindToNearestAprilTag(false));
+        pilot.b().whileTrue(tagAlign.pathfindToNearestCoralReefAprilTag(true));
+        pilot.x().whileTrue(tagAlign.pathfindToNearestCoralReefAprilTag(false));
+        pilot.y().whileTrue(tagAlign.pathfindToNearestAlgaeReefAprilTag());
+        pilot.a().whileTrue(tagAlign.pathfindToNearestAlgaeProcAprilTag());
+        pilot.povUp().whileTrue(tagAlign.pathfindToNearestCoralStationAprilTag());
         
         drivetrain.registerTelemetry(logger::telemeterize);
           
