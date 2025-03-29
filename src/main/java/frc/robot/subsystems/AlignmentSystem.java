@@ -260,7 +260,7 @@ public Command pathfindToNearestBargeAprilTag() {
     () -> {
       // This lambda runs when the command is actually scheduled (button pressed)
       AprilTag targetTag = getNearestTag(bargeTags);
-      targetPose = getTargetPose(targetTag,-1,0);
+      targetPose = getTargetPose(targetTag,-1,0); // 1 meter off
       // Return the actual command to be run
       return AutoBuilder.pathfindToPose(targetPose, m_pathConstraints, 0);
   }, Set.of(this));

@@ -74,11 +74,11 @@ public class RobotContainer {
 
     //PATHFINDING TEST
     private final Pose2d leftFeederTargetPose = new Pose2d(1.14, 6.93, Rotation2d.fromDegrees(127.16));
-    private final Pose2d algaeScoreTargerPose = new Pose2d(5.98, .58, Rotation2d.fromDegrees(-90));
+    private final Pose2d algaeScoreTargetPose = new Pose2d(5.98, .58, Rotation2d.fromDegrees(-90));
 
     public static final PathConstraints pathFindConstraints = new PathConstraints(MaxSpeed, 4, MaxAngularRate, Units.degreesToRadians(540));
     private final Command leftFeederPathfind = AutoBuilder.pathfindToPose(leftFeederTargetPose, pathFindConstraints, 1);
-    private final Command algaeScorePathfind = AutoBuilder.pathfindToPose(algaeScoreTargerPose, pathFindConstraints, 1);
+    private final Command algaeScorePathfind = AutoBuilder.pathfindToPose(algaeScoreTargetPose, pathFindConstraints, 1);
     
     private final SendableChooser<Command> autoChooser;
 
@@ -103,6 +103,8 @@ public class RobotContainer {
         SmartDashboard.putData("Pathfind to Nearest AprilTag", new InstantCommand(() -> tagAlign.pathfindToNearestAprilTagOld(false).schedule()));
 
         configureBindings();
+
+        SmartDashboard.putBoolean("Enable MegaTag2", false);
     }
 
     private void configureBindings() {
