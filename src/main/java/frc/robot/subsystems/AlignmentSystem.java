@@ -206,7 +206,7 @@ public Command pathfindToNearestCoralStationAprilTag(boolean offsetRight) {
       // This lambda runs when the command is actually scheduled (button pressed)
       this.offsetRight = offsetRight;
       targetTag = getNearestTag(coralStationTags);
-      targetPose = getTargetCoralReefPose(targetTag);
+      targetPose = getTargetPose(targetTag,CoralForwardDistance,.610); // 2ft
       
       // Return the actual command to be run
       return AutoBuilder.pathfindToPose(targetPose, m_pathConstraints, 0);
@@ -220,7 +220,6 @@ public Command pathfindToNearestAlgaeReefAprilTag() {
   return Commands.defer(
     () -> {
       // This lambda runs when the command is actually scheduled (button pressed)
-      // this.offsetRight = offsetRight;
       targetTag = getNearestTag(reefTags);
       targetPose = getTargetPose(targetTag,CoralForwardDistance,0);
       
@@ -234,9 +233,8 @@ public Command pathfindToNearestAlgaeProcAprilTag() {
   return Commands.defer(
     () -> {
       // This lambda runs when the command is actually scheduled (button pressed)
-      // this.offsetRight = offsetRight;
       AprilTag targetTag = getNearestTag(algaeProcTags);
-      targetPose = getTargetPose(targetTag,-.508,0);
+      targetPose = getTargetPose(targetTag,-.508,0); // 1 ft
       
       // Return the actual command to be run
       return AutoBuilder.pathfindToPose(targetPose, m_pathConstraints, 0);
@@ -248,7 +246,6 @@ public Command pathfindToNearestCoralStationAprilTag() {
   return Commands.defer(
     () -> {
       // This lambda runs when the command is actually scheduled (button pressed)
-      // this.offsetRight = offsetRight;
       AprilTag targetTag = getNearestTag(coralStationTags);
       targetPose = getTargetPose(targetTag,CoralForwardDistance,.305);
       
@@ -262,7 +259,6 @@ public Command pathfindToNearestBargeAprilTag() {
   return Commands.defer(
     () -> {
       // This lambda runs when the command is actually scheduled (button pressed)
-      // this.offsetRight = offsetRight;
       AprilTag targetTag = getNearestTag(bargeTags);
       targetPose = getTargetPose(targetTag,-1,0);
       // Return the actual command to be run
