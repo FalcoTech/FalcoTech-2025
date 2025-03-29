@@ -48,15 +48,15 @@ public class AlignmentSystem extends SubsystemBase {
     reefTags.addAll(field.getTags().subList(5,11)); // Red Reef Tags (need to write 5 so 6 is included)
     reefTags.addAll(field.getTags().subList(16,22)); // Blue Reef Tags (need to write 16 so 17 is included)
     coralStationTags =new ArrayList<AprilTag>();
+    coralStationTags.add(field.getTags().get(0));
     coralStationTags.add(field.getTags().get(1));
-    coralStationTags.add(field.getTags().get(2));
+    coralStationTags.add(field.getTags().get(11));
     coralStationTags.add(field.getTags().get(12));
-    coralStationTags.add(field.getTags().get(13));
     bargeTags = new ArrayList<AprilTag>();
+    bargeTags.add(field.getTags().get(3));
     bargeTags.add(field.getTags().get(4));
-    bargeTags.add(field.getTags().get(5));
+    bargeTags.add(field.getTags().get(13));
     bargeTags.add(field.getTags().get(14));
-    bargeTags.add(field.getTags().get(15));
     algaeProcTags = new ArrayList<AprilTag>();
     algaeProcTags.add(field.getTags().get(15)); //Arrays start at 0 :Zany: o.O
     algaeProcTags.add(field.getTags().get(2));
