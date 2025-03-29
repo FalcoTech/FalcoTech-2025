@@ -119,6 +119,7 @@ public class RobotContainer {
         pilot.y().whileTrue(tagAlign.pathfindToNearestAlgaeReefAprilTag());
         pilot.a().whileTrue(tagAlign.pathfindToNearestAlgaeProcAprilTag());
         pilot.povUp().whileTrue(tagAlign.pathfindToNearestCoralStationAprilTag());
+        pilot.povDown().whileTrue(tagAlign.pathfindToNearestBargeAprilTag());
         
         drivetrain.registerTelemetry(logger::telemeterize);
           

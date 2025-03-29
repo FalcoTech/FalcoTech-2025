@@ -257,7 +257,19 @@ public Command pathfindToNearestCoralStationAprilTag() {
   }, Set.of(this));
 
 }
+public Command pathfindToNearestBargeAprilTag() {
+  // Use a ProxyCommand to defer creation until execution time
+  return Commands.defer(
+    () -> {
+      // This lambda runs when the command is actually scheduled (button pressed)
+      // this.offsetRight = offsetRight;
+      AprilTag targetTag = getNearestTag(bargeTags);
+      targetPose = getTargetPose(targetTag,-1,0);
+      // Return the actual command to be run
+      return AutoBuilder.pathfindToPose(targetPose, m_pathConstraints, 0);
+  }, Set.of(this));
 
+}
 
 
   private AprilTag getNearestCoralReefTag(){
