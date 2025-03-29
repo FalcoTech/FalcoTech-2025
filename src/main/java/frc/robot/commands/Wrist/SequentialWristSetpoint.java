@@ -32,7 +32,10 @@ public class SequentialWristSetpoint extends Command {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    m_wrist.StopWrist();
+    //Maybe make this condiitional and have is Finished hit true if the copilot moves the joystick 
+    // if (interrupted){
+      m_wrist.StopWrist();
+    // }
   }
 
   // Returns true when the command should end.
