@@ -5,15 +5,15 @@
     "data": {
       "commands": [
         {
-          "type": "named",
+          "type": "path",
           "data": {
-            "name": "Drive to Nearest Right Reef"
+            "pathName": "L3 FAR"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "Elevator L4 Score"
+            "name": "Elevator L3 Score"
           }
         }
       ]
