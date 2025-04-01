@@ -148,10 +148,10 @@ public class RobotContainer {
         
         //ALGAE INTAKE
         Copilot.leftBumper().whileTrue(new RunAlgaeIntake(() -> IntakeConstants.ALGAE_INTAKE_SPEED));
-        Copilot.rightBumper().whileTrue(new RunAlgaeIntake(() -> IntakeConstants.ALGAE_OUTTAKE_SPEED)).onFalse(new RunAlgaeIntake(() -> IntakeConstants.ALGAE_INTAKE_SPEED).withTimeout(1));
+        // Copilot.rightBumper().whileTrue(new RunAlgaeIntake(() -> IntakeConstants.ALGAE_OUTTAKE_SPEED)).onFalse(new RunAlgaeIntake(() -> IntakeConstants.ALGAE_INTAKE_SPEED).withTimeout(1));
 
-        Copilot.rightBumper().toggleOnTrue(new RunAlgaeIntake(() -> -.5));
-        Copilot.rightBumper().toggleOnFalse(new RunAlgaeIntake(() -> 1.0).withTimeout(1));
+        Copilot.rightBumper().toggleOnTrue(new RunAlgaeIntake(() -> IntakeConstants.ALGAE_INTAKE_SPEED));
+        Copilot.rightBumper().toggleOnFalse(new RunAlgaeIntake(() -> IntakeConstants.ALGAE_OUTTAKE_SPEED).withTimeout(1));
 
         //CORAL INTAKE
         coralIntake.setDefaultCommand(new RunCoralIntake(()-> Copilot.getRightTriggerAxis()-Copilot.getLeftTriggerAxis()));

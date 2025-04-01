@@ -82,8 +82,8 @@ public final class Constants {
   }
   
   public static final class IntakeConstants {
-    public static final double ALGAE_INTAKE_SPEED = 1.0;
-    public static final double ALGAE_OUTTAKE_SPEED = -0.5;
+    public static final double ALGAE_INTAKE_SPEED = -0.5;
+    public static final double ALGAE_OUTTAKE_SPEED = 1.0;
     
     public static final double CORAL_INTAKE_SPEED = 0.3;
     public static final double CORAL_OUTTAKE_SPEED = -0.2;
