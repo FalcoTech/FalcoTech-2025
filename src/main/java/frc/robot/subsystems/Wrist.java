@@ -40,7 +40,7 @@ public class Wrist extends SubsystemBase {
     WristMotorConfigurator.apply(WristMotorConfig);
     WristMotor.setNeutralMode(NeutralModeValue.Brake);
 
-    SmartDashboard.putData("Reset Wrist Encoder", new InstantCommand(() -> ResetWristEncoder()).ignoringDisable(true));
+    // SmartDashboard.putData("Reset Wrist Encoder", new InstantCommand(() -> ResetWristEncoder()).ignoringDisable(true));
     // SmartDashboard.putBoolean("Wrist Connected?", WristEncoder.isConnected());
 
     WristEncoder.setInverted(true);

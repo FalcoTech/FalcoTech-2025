@@ -48,13 +48,7 @@ import frc.robot.subsystems.CoralIntake;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Wrist;
 
-import static frc.robot.Constants.ControllerConstants;
-import static frc.robot.Constants.DrivetrainConstants;
-import static frc.robot.Constants.PathPlanningConstants;
-import static frc.robot.Constants.WristConstants;
-import static frc.robot.Constants.ElevatorConstants;
-import static frc.robot.Constants.IntakeConstants;
-import static frc.robot.Constants.ClimbConstants;
+import static frc.robot.Constants.*;
 
 public class RobotContainer {
     /* Initialize Game Controllers */
@@ -66,7 +60,8 @@ public class RobotContainer {
     public static double MaxAngularRate = DrivetrainConstants.MAX_ANGULAR_RATE_RADIANS_PER_SECOND;
     /* Setting up control commands of the swerve drive */
     public static final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
-            .withDeadband(MaxSpeed * ControllerConstants.DEADBAND).withRotationalDeadband(MaxAngularRate * ControllerConstants.DEADBAND) // Add a 10% deadband
+            .withDeadband(MaxSpeed * ControllerConstants.DEADBAND)
+            .withRotationalDeadband(MaxAngularRate * ControllerConstants.DEADBAND) // Add a 10% deadband
             .withDriveRequestType(DriveRequestType.Velocity); // Use open-loop control for drive motors
 
     public static final SwerveRequest.RobotCentric driveRobotCentric = new SwerveRequest.RobotCentric()
@@ -128,6 +123,7 @@ public class RobotContainer {
         // reset the field-centric heading on start button press
         pilot.start().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
 
+
         pilot.b().whileTrue(tagAlign.pathfindToNearestCoralReefAprilTag(true));
         pilot.x().whileTrue(tagAlign.pathfindToNearestCoralReefAprilTag(false));
         pilot.y().whileTrue(tagAlign.pathfindToNearestAlgaeReefAprilTag());
@@ -152,7 +148,7 @@ public class RobotContainer {
         
         //ALGAE INTAKE
         Copilot.leftBumper().whileTrue(new RunAlgaeIntake(() -> IntakeConstants.ALGAE_INTAKE_SPEED));
-        Copilot.rightBumper().whileTrue(new RunAlgaeIntake(() -> IntakeConstants.ALGAE_OUTTAKE_SPEED)).onFalse(new RunAlgaeIntake(() -> 1.0).withTimeout(1));
+        Copilot.rightBumper().whileTrue(new RunAlgaeIntake(() -> IntakeConstants.ALGAE_OUTTAKE_SPEED)).onFalse(new RunAlgaeIntake(() -> IntakeConstants.ALGAE_INTAKE_SPEED).withTimeout(1));
 
 
         //CORAL INTAKE
@@ -162,22 +158,24 @@ public class RobotContainer {
         //WRIST
         wrist.setDefaultCommand(new RunWrist(() -> Copilot.getLeftY()));
         //Climb
-        Copilot.povLeft().whileTrue(climb.RunClimbCommand(() -> ClimbConstants.CLIMB_SPEED));
-        Copilot.povRight().whileTrue(climb.RunClimbCommand(() -> -ClimbConstants.CLIMB_SPEED));
+        pilot.povLeft().whileTrue(climb.RunClimbCommand(() -> ClimbConstants.CLIMB_SPEED));
+        pilot.povRight().whileTrue(climb.RunClimbCommand(() -> -ClimbConstants.CLIMB_SPEED));
         
 
         //ELEVATOR SETPOINTS
         //
         Copilot.povDown().onTrue( //Home position (does work)
             new SequentialCommandGroup(
-                elevator.GetLeftElevatorPosition() > 1 && elevator.GetLeftElevatorPosition() < 4.5 && wrist.GetWristEncoderPosition() > 18 ? 
+                elevator.GetLeftElevatorPosition() > ElevatorConstants.MIN_ELEVATOR_SAFETY_THRESHOLD && 
+                elevator.GetLeftElevatorPosition() < ElevatorConstants.MAX_ELEVATOR_SAFETY_THRESHOLD && 
+                wrist.GetWristEncoderPosition() > WristConstants.WRIST_SAFETY_THRESHOLD ? 
                    new SequentialCommandGroup(
-                       new SequentialElevatorSetpoint(6), 
-                       new ParallelDeadlineGroup(new SetWristToPosition(0), new SetElevatorToPosition(6)),
+                       new SequentialElevatorSetpoint(ElevatorConstants.ALGAE_PROCESSOR_POSITION), 
+                       new ParallelDeadlineGroup(new SetWristToPosition(WristConstants.HOME_POSITION), new SetElevatorToPosition(ElevatorConstants.ALGAE_PROCESSOR_POSITION)),
                        new InstantCommand(() -> elevator.StopElevator())
                    ) : 
                    new ParallelDeadlineGroup(
-                       new SetWristToPosition(0),
+                       new SetWristToPosition(WristConstants.HOME_POSITION),
                        new SequentialElevatorSetpoint(ElevatorConstants.HOME_POSITION)
                    )
             )
@@ -187,7 +185,7 @@ public class RobotContainer {
             new SequentialElevatorSetpoint(ElevatorConstants.L2_SCORE_POSITION),
             new ParallelCommandGroup(
                 new SetElevatorToPosition(ElevatorConstants.L2_SCORE_POSITION),
-                new SetWristToPosition(5.8)
+                new SetWristToPosition(WristConstants.L2_SCORE_POSITION)
             )
         ));
 
@@ -195,7 +193,7 @@ public class RobotContainer {
             new SequentialElevatorSetpoint(ElevatorConstants.L3_SCORE_POSITION),
             new ParallelCommandGroup(
                 new SetElevatorToPosition(ElevatorConstants.L3_SCORE_POSITION),
-                new SetWristToPosition(5.8)
+                new SetWristToPosition(WristConstants.L3_SCORE_POSITION)
             )
         ));
 
@@ -211,33 +209,29 @@ public class RobotContainer {
             new SetElevatorToPosition(ElevatorConstants.L2_ALGAE_POSITION),
             new SetWristToPosition(WristConstants.L2_ALGAE_POSITION) //L2 
         ));
-        
         Copilot.a().and(Copilot.y()).onTrue(new ParallelCommandGroup(
             new SetElevatorToPosition(ElevatorConstants.L3_ALGAE_POSITION),
             new SetWristToPosition(WristConstants.L3_ALGAE_POSITION) //L3
         ));
-        
         Copilot.a().and(Copilot.b()).onTrue(new ParallelCommandGroup(
             new SetElevatorToPosition(ElevatorConstants.BARGE_POSITION),
             new SetWristToPosition(WristConstants.BARGE_POSITION) //Barge
         ));
-        
         Copilot.a().and(Copilot.povUp()).onTrue(new ParallelCommandGroup(
             new SetElevatorToPosition(ElevatorConstants.ALGAE_PROCESSOR_POSITION),
             new SetWristToPosition(WristConstants.ALGAE_PROCESSOR_POSITION) //Algae Processor
         ));
-        
         Copilot.a().and(Copilot.povDown()).onTrue(new ParallelCommandGroup(
             new SetElevatorToPosition(ElevatorConstants.FLOOR_LOAD_POSITION),
             new SetWristToPosition(WristConstants.FLOOR_POSITION) //Algae Floor Load
         ));
+    
 
-        // If you uncomment this later, update it too:
         // Copilot.povRight().onTrue(new SequentialCommandGroup( //L4 SCORING VALUES
         // new SequentialElevatorSetpoint(ElevatorConstants.L4_SCORE_POSITION),
         // new ParallelCommandGroup(
         //     new SetElevatorToPosition(ElevatorConstants.L4_SCORE_POSITION),
-        //     new SetWristToPosition(5.8) 
+        //     new SetWristToPosition(WristConstants.L4_SCORE_POSITION) 
         // )
         // ));
 
@@ -245,11 +239,11 @@ public class RobotContainer {
             new SequentialElevatorSetpoint(ElevatorConstants.CORAL_STATION_POSITION),
             new ParallelCommandGroup(
                 new SetElevatorToPosition(ElevatorConstants.CORAL_STATION_POSITION),
-                new SetWristToPosition(20.1) 
+                new SetWristToPosition(WristConstants.CORAL_STATION_POSITION) 
             )
         ));
 
-        Copilot.back().onTrue(new SequentialCommandGroup(new RunCoralIntake(() -> -.2).withTimeout(.15), new RunCoralIntake(() -> .2).withTimeout(.15), new RunCoralIntake(() -> -.2).withTimeout(.15), new RunCoralIntake(() -> .2).withTimeout(.15), new RunCoralIntake(() -> 0.0).withTimeout(0.15)));
+        Copilot.back().onTrue(new SequentialCommandGroup(new RunCoralIntake(() -> IntakeConstants.CORAL_OUTTAKE_SPEED).withTimeout(.15), new RunCoralIntake(() -> IntakeConstants.CORAL_INTAKE_SPEED).withTimeout(.15), new RunCoralIntake(() -> IntakeConstants.CORAL_OUTTAKE_SPEED).withTimeout(.15), new RunCoralIntake(() -> IntakeConstants.CORAL_INTAKE_SPEED).withTimeout(.15), new RunCoralIntake(() -> 0.0).withTimeout(0.15)));
     }
 
     public Command getAutonomousCommand() {
@@ -272,14 +266,14 @@ public class RobotContainer {
             new SequentialElevatorSetpoint(ElevatorConstants.L3_SCORE_POSITION),
             new ParallelRaceGroup(
                 new SetElevatorToPosition(ElevatorConstants.L3_SCORE_POSITION),
-                new SequentialWristSetpoint(5.8)
+                new SequentialWristSetpoint(WristConstants.L3_SCORE_POSITION)
             ),
             new ParallelRaceGroup(
                 new SetElevatorToPosition(ElevatorConstants.L3_SCORE_POSITION),
-                new SetWristToPosition(5.8),
-                new RunCoralIntake(() -> 0.3).withTimeout(2)
+                new SetWristToPosition(WristConstants.L3_SCORE_POSITION),
+                new RunCoralIntake(() -> IntakeConstants.CORAL_INTAKE_SPEED).withTimeout(2)
             ),
-            new SequentialWristSetpoint(0)
+            new SequentialWristSetpoint(WristConstants.HOME_POSITION)
         );
     }
 
@@ -288,14 +282,14 @@ public class RobotContainer {
             new SequentialElevatorSetpoint(ElevatorConstants.L4_SCORE_POSITION),
             new ParallelRaceGroup(
                 new SetElevatorToPosition(ElevatorConstants.L4_SCORE_POSITION),
-                new SequentialWristSetpoint(5.8)
+                new SequentialWristSetpoint(WristConstants.L4_SCORE_POSITION)
             ),
             new ParallelRaceGroup(
                 new SetElevatorToPosition(ElevatorConstants.L4_SCORE_POSITION),
-                new SetWristToPosition(5.8),
-                new RunCoralIntake(() -> 0.3).withTimeout(2)
+                new SetWristToPosition(WristConstants.L4_SCORE_POSITION),
+                new RunCoralIntake(() -> IntakeConstants.CORAL_INTAKE_SPEED).withTimeout(2)
             ),
-            new SequentialWristSetpoint(0)
+            new SequentialWristSetpoint(WristConstants.HOME_POSITION)
         );
     }
 

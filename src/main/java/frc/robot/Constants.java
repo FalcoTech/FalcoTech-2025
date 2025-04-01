@@ -51,6 +51,11 @@ public final class Constants {
     
     // PID constants and other elevator-related values
     public static final double ELEVATOR_CONTROL_SCALE = 0.5; // Scale for Copilot.getRightY()
+    public static final double LOWER_ELEVATOR_SPEED = -0.01; //Speed to drop elevator
+    
+    // Safety thresholds for home position logic
+    public static final double MIN_ELEVATOR_SAFETY_THRESHOLD = 1.0;
+    public static final double MAX_ELEVATOR_SAFETY_THRESHOLD = 4.5;
   }
   
   public static final class WristConstants {
@@ -70,6 +75,10 @@ public final class Constants {
     // From SetWristToPosition.java line 42
     public static final double HOME_THRESHOLD = 0.05;
     public static final double OVERRIDE_THRESHOLD = 0.2;
+    public static final double POSITION_THRESHOLD = 0.1;
+    
+    // Safety threshold for home position logic
+    public static final double WRIST_SAFETY_THRESHOLD = 18.0;
   }
   
   public static final class IntakeConstants {
