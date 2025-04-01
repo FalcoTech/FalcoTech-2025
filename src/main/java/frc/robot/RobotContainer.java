@@ -67,7 +67,7 @@ public class RobotContainer {
     public static final SwerveRequest.RobotCentric driveRobotCentric = new SwerveRequest.RobotCentric()
             .withDeadband(MaxSpeed * ControllerConstants.DEADBAND).withRotationalDeadband(MaxAngularRate * ControllerConstants.DEADBAND)
             .withDriveRequestType(DriveRequestType.Velocity);
-            
+    
     private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
     private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
     private final SwerveRequest.RobotCentric forwardStraight = new SwerveRequest.RobotCentric()
@@ -150,6 +150,8 @@ public class RobotContainer {
         Copilot.leftBumper().whileTrue(new RunAlgaeIntake(() -> IntakeConstants.ALGAE_INTAKE_SPEED));
         Copilot.rightBumper().whileTrue(new RunAlgaeIntake(() -> IntakeConstants.ALGAE_OUTTAKE_SPEED)).onFalse(new RunAlgaeIntake(() -> IntakeConstants.ALGAE_INTAKE_SPEED).withTimeout(1));
 
+        Copilot.rightBumper().toggleOnTrue(new RunAlgaeIntake(() -> -.5));
+        Copilot.rightBumper().toggleOnFalse(new RunAlgaeIntake(() -> 1.0).withTimeout(1));
 
         //CORAL INTAKE
         coralIntake.setDefaultCommand(new RunCoralIntake(()-> Copilot.getRightTriggerAxis()-Copilot.getLeftTriggerAxis()));
