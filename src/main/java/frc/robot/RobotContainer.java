@@ -276,6 +276,9 @@ public class RobotContainer {
         NamedCommands.registerCommand("Elevator L3 Score", ElevatorL3Score());
 
         NamedCommands.registerCommand("Elevator L4 Score", ElevatorL4Score());
+
+        NamedCommands.registerCommand("Coral Station Pickup", CoralStationPickup());
+
         NamedCommands.registerCommand("Drive to Nearest Right Reef", tagAlign.pathfindToNearestCoralReefAprilTag(true));
     }
 
@@ -305,6 +308,20 @@ public class RobotContainer {
             new ParallelRaceGroup(
                 new SetElevatorToPosition(ElevatorConstants.L4_SCORE_POSITION),
                 new SetWristToPosition(WristConstants.L4_SCORE_POSITION),
+                new RunCoralIntake(() -> IntakeConstants.CORAL_INTAKE_SPEED).withTimeout(2)
+            ),
+            new SequentialWristSetpoint(WristConstants.HOME_POSITION)
+        );
+    }
+
+    public Command CoralStationPickup(){
+        return new SequentialCommandGroup(
+            new SequentialElevatorSetpoint(ElevatorConstants.CORAL_STATION_POSITION),
+            new ParallelRaceGroup(
+                new SetElevatorToPosition(ElevatorConstants.CORAL_STATION_POSITION),
+                new SequentialWristSetpoint(WristConstants.CORAL_STATION_POSITION)
+            ),
+            new SequentialCommandGroup(
                 new RunCoralIntake(() -> IntakeConstants.CORAL_INTAKE_SPEED).withTimeout(2)
             ),
             new SequentialWristSetpoint(WristConstants.HOME_POSITION)
