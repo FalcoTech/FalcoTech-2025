@@ -4,21 +4,21 @@
 
 package frc.robot.commands.Wrist;
 
-import com.pathplanner.lib.config.RobotConfig;
-
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.Wrist;
+import static frc.robot.Constants.WristConstants;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class SequentialWristSetpoint extends Command {
-  private final Wrist m_wrist = RobotContainer.wrist;
   private double Position;
+  private Wrist m_wrist;
+  
   /** Creates a new SequentialWristSetpoint. */
   public SequentialWristSetpoint(double position) {
-    // Use addRequirements() here to declare subsystem dependencies.
+    Position = position;
+    m_wrist = RobotContainer.wrist;
     addRequirements(m_wrist);
-    this.Position = position;
   }
 
   // Called when the command is initially scheduled.
@@ -34,12 +34,16 @@ public class SequentialWristSetpoint extends Command {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    m_wrist.StopWrist();
+    //Maybe make this condiitional and have is Finished hit true if the copilot moves the joystick 
+    // if (interrupted){
+      m_wrist.StopWrist();
+    // }
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return Math.abs(Position - m_wrist.GetWristEncoderPosition()) < .1 || Math.abs(RobotContainer.Copilot.getLeftY()) > .2;
+    return Math.abs(Position - m_wrist.GetWristEncoderPosition()) < WristConstants.POSITION_THRESHOLD || 
+           Math.abs(RobotContainer.Copilot.getLeftY()) > WristConstants.OVERRIDE_THRESHOLD;
   }
 }

@@ -37,7 +37,7 @@ public class Elevator extends SubsystemBase {
   private final RelativeEncoder LeftElevatorEncoder = LeftElevatorMotor.getEncoder();
   private final RelativeEncoder RightElevatorEncoder = RightElevatorMotor.getEncoder();
   
-  private final PIDController ElevatorPID = new PIDController(.2, 0, 0); //kP = .1
+  private final PIDController ElevatorPID = new PIDController(.17, 0, 0); //kP = .1
   private final ElevatorFeedforward ElevatorFF = new ElevatorFeedforward(0, .06, 0, 0); //kG = .1
   /** Creates a new Elevator. */
   public Elevator() {
@@ -45,6 +45,8 @@ public class Elevator extends SubsystemBase {
     // RightElevatorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
     LeftElevatorConfig.idleMode(IdleMode.kBrake);
     RightElevatorConfig.idleMode(IdleMode.kBrake);
+    LeftElevatorConfig.voltageCompensation(12);
+    RightElevatorConfig.voltageCompensation(12);
 
     RightElevatorConfig.follow(20, true);
 

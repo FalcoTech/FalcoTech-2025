@@ -7,7 +7,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Test Path"
+            "pathName": "L3 PROC"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Elevator L3 Score"
           }
         }
       ]

@@ -7,7 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "L3 RED"
+            "pathName": "L3 FAR"
           }
         },
         {
@@ -19,7 +19,7 @@
       ]
     }
   },
-  "resetOdom": false,
+  "resetOdom": true,
   "folder": null,
   "choreoAuto": false
 }
