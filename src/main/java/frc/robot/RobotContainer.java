@@ -199,12 +199,27 @@ public class RobotContainer {
             )
         ));
 
-        Copilot.b().onTrue(new SequentialCommandGroup( //L4 SCORING
+        // Copilot.b().onTrue(new SequentialCommandGroup( //L4 SCORING
+        //      new SequentialElevatorSetpoint(ElevatorConstants.L4_SCORE_POSITION),
+        //     new ParallelCommandGroup(
+        //         new SetElevatorToPosition(ElevatorConstants.L4_SCORE_POSITION),
+        //         new SetWristToPosition(WristConstants.L4_SCORE_POSITION)
+        //     )
+        // ));
+        
+        Copilot.b().toggleOnTrue(new SequentialCommandGroup( //L4 SCORING
              new SequentialElevatorSetpoint(ElevatorConstants.L4_SCORE_POSITION),
             new ParallelCommandGroup(
                 new SetElevatorToPosition(ElevatorConstants.L4_SCORE_POSITION),
                 new SetWristToPosition(WristConstants.L4_SCORE_POSITION)
             )
+        ));
+        Copilot.b().toggleOnFalse(new SequentialCommandGroup( //L4 SCORING
+            new ParallelRaceGroup(
+                new SetElevatorToPosition(ElevatorConstants.L4_SCORE_POSITION),
+                new SequentialWristSetpoint(WristConstants.HOME_POSITION)
+            ),
+            new SetElevatorToPosition(ElevatorConstants.HOME_POSITION)
         ));
 
         Copilot.a().and(Copilot.x()).onTrue(new ParallelCommandGroup(
