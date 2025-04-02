@@ -5,21 +5,15 @@
     "data": {
       "commands": [
         {
-          "type": "path",
-          "data": {
-            "pathName": "L3 BLUE"
-          }
-        },
-        {
           "type": "named",
           "data": {
-            "name": "Elevator L3 Score"
+            "name": "Elevator L4 Score"
           }
         }
       ]
     }
   },
-  "resetOdom": true,
+  "resetOdom": false,
   "folder": null,
   "choreoAuto": false
 }

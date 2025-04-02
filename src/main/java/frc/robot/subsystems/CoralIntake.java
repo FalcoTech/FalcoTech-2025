@@ -9,6 +9,7 @@ import java.util.function.Supplier;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class CoralIntake extends SubsystemBase {
@@ -22,6 +23,8 @@ public class CoralIntake extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    SmartDashboard.putNumber("Coral Intake Speed", this.getSpeed());
+
   }
 
   public void setCoralIntakePosition(double rotations){
@@ -34,11 +37,16 @@ public class CoralIntake extends SubsystemBase {
 
   //function to run coral intake
   public void RunCoralIntake(Supplier<Double> speed){
-    CoralIntakeMotor.set(speed.get()*.8);
+    CoralIntakeMotor.set(speed.get()*1);
   }
   //function to stop coral intake 
   public void StopCoralIntake(){
     CoralIntakeMotor.set(0);
+  }
+
+  public double getSpeed() {
+    return CoralIntakeMotor.getVelocity().getValueAsDouble();
+    
   }
 
 }

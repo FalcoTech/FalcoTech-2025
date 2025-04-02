@@ -30,7 +30,6 @@ public class Wrist extends SubsystemBase {
   private final TalonFX WristMotor = new TalonFX(30);
   private TalonFXConfiguration WristMotorConfig = new TalonFXConfiguration();
   private TalonFXConfigurator WristMotorConfigurator = WristMotor.getConfigurator();
-
   private final DutyCycleEncoder WristEncoder = new DutyCycleEncoder(0, 40, 0);
 
   ArmFeedforward m_WristFeedforward = new ArmFeedforward(0, 0.05, 0.01); //TODO: Tune these values
@@ -41,7 +40,6 @@ public class Wrist extends SubsystemBase {
     WristMotorConfigurator.apply(WristMotorConfig);
     WristMotor.setNeutralMode(NeutralModeValue.Brake);
 
-    SmartDashboard.putData("Reset Wrist Encoder", new InstantCommand(() -> ResetWristEncoder()).ignoringDisable(true));
     // SmartDashboard.putBoolean("Wrist Connected?", WristEncoder.isConnected());
 
     WristEncoder.setInverted(true);
@@ -76,7 +74,4 @@ public class Wrist extends SubsystemBase {
     return WristEncoder.get() - .94;
   }
 
-  public void ResetWristEncoder(){
-    // WristMotor.setPosition(0);
-  }
 }

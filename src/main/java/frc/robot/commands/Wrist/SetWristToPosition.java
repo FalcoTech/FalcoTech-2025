@@ -7,6 +7,7 @@ package frc.robot.commands.Wrist;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.Wrist;
+import static frc.robot.Constants.WristConstants;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class SetWristToPosition extends Command {
@@ -38,7 +39,8 @@ public class SetWristToPosition extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    // return m_wrist.GetWristEncoderPosition() == position;
-    return (position == 0 ? m_wrist.GetWristEncoderPosition() < .05 : false) || Math.abs(RobotContainer.Copilot.getLeftY()) > .2;
+    return (position == WristConstants.HOME_POSITION ? 
+            m_wrist.GetWristEncoderPosition() < WristConstants.HOME_THRESHOLD : false) || 
+           Math.abs(RobotContainer.Copilot.getLeftY()) > WristConstants.OVERRIDE_THRESHOLD;
   }
 }

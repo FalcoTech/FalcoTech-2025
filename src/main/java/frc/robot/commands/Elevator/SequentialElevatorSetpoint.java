@@ -6,6 +6,7 @@ package frc.robot.commands.Elevator;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.RobotContainer;
+import frc.robot.Constants.ElevatorConstants;
 import frc.robot.subsystems.Elevator;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
@@ -27,7 +28,7 @@ public class SequentialElevatorSetpoint extends Command {
   @Override
   public void execute() {
     if (Position < m_Elevator.GetLeftElevatorPosition()){
-      m_Elevator.StopElevator();
+      m_Elevator.MoveElevator(() -> ElevatorConstants.LOWER_ELEVATOR_SPEED );
     } else {
       m_Elevator.MoveElevatorToPosition(Position);
     }

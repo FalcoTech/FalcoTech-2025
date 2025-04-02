@@ -4,73 +4,70 @@
 
 package frc.robot;
 
-import static edu.wpi.first.units.Units.*;
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
-import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveModule.SteerRequestType;
+import com.ctre.phoenix6.swerve.jni.SwerveJNI.DriveState;
 import com.ctre.phoenix6.swerve.SwerveRequest;
-
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.path.PathConstraints;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.util.sendable.Sendable;
-import edu.wpi.first.util.sendable.SendableBuilder;
-import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.commands.Algae.RunAlgaeIntake;
-import frc.robot.commands.Coral.CenterCoral;
 import frc.robot.commands.Coral.RunCoralIntake;
 import frc.robot.commands.Elevator.RunElevator;
 import frc.robot.commands.Elevator.SequentialElevatorSetpoint;
 import frc.robot.commands.Elevator.SetElevatorToPosition;
-import frc.robot.commands.Swerve.RumbleCommand;
 import frc.robot.commands.Swerve.TeleOpDrive;
 import frc.robot.commands.Wrist.RunWrist;
 import frc.robot.commands.Wrist.SequentialWristSetpoint;
 import frc.robot.commands.Wrist.SetWristToPosition;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.AlgaeIntake;
+import frc.robot.subsystems.AlignmentSystem;
 import frc.robot.subsystems.Climb;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.CoralIntake;
 import frc.robot.subsystems.Elevator;
-import frc.robot.subsystems.AlignmentSystem;
 import frc.robot.subsystems.Wrist;
+
+import static frc.robot.Constants.*;
 
 public class RobotContainer {
     /* Initialize Game Controllers */
-    public static final CommandXboxController pilot = new CommandXboxController(0);
-    public static final CommandXboxController Copilot = new CommandXboxController(1);
+    public static final CommandXboxController pilot = new CommandXboxController(ControllerConstants.PILOT_CONTROLLER_PORT);
+    public static final CommandXboxController Copilot = new CommandXboxController(ControllerConstants.COPILOT_CONTROLLER_PORT);
 
     /* Set max speeds */
-    public static double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);// kSpeedAt12Volts desired top speed
-    public static double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
+    public static double MaxSpeed = DrivetrainConstants.MAX_SPEED_METERS_PER_SECOND;
+    public static double MaxAngularRate = DrivetrainConstants.MAX_ANGULAR_RATE_RADIANS_PER_SECOND;
     /* Setting up control commands of the swerve drive */
     public static final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
-            .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
+            .withDeadband(MaxSpeed * ControllerConstants.DEADBAND)
+            .withRotationalDeadband(MaxAngularRate * ControllerConstants.DEADBAND) // Add a 10% deadband
             .withDriveRequestType(DriveRequestType.Velocity); // Use open-loop control for drive motors
 
     public static final SwerveRequest.RobotCentric driveRobotCentric = new SwerveRequest.RobotCentric()
-            .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1)
+            .withDeadband(MaxSpeed * ControllerConstants.DEADBAND).withRotationalDeadband(MaxAngularRate * ControllerConstants.DEADBAND)
             .withDriveRequestType(DriveRequestType.Velocity);
-            
+    
     private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
     private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
     private final SwerveRequest.RobotCentric forwardStraight = new SwerveRequest.RobotCentric()
@@ -79,12 +76,16 @@ public class RobotContainer {
     private final Telemetry logger = new Telemetry(MaxSpeed);
 
     //PATHFINDING TEST
-    private final Pose2d leftFeederTargetPose = new Pose2d(1.14, 6.93, Rotation2d.fromDegrees(127.16));
-    private final Pose2d algaeScoreTargerPose = new Pose2d(5.98, .58, Rotation2d.fromDegrees(-90));
+    private final Pose2d leftFeederTargetPose = PathPlanningConstants.LEFT_FEEDER_POSE;
+    private final Pose2d algaeScoreTargetPose = PathPlanningConstants.ALGAE_SCORE_POSE;
 
-    public static final PathConstraints pathFindConstraints = new PathConstraints(MaxSpeed, 4, MaxAngularRate, Units.degreesToRadians(540));
+    public static final PathConstraints pathFindConstraints = new PathConstraints(
+        PathPlanningConstants.MAX_PATH_SPEED, 
+        PathPlanningConstants.MAX_PATH_ACCELERATION, 
+        PathPlanningConstants.MAX_ANGULAR_SPEED * (Math.PI/180), 
+        PathPlanningConstants.MAX_ANGULAR_ACCELERATION);
     private final Command leftFeederPathfind = AutoBuilder.pathfindToPose(leftFeederTargetPose, pathFindConstraints, 1);
-    private final Command algaeScorePathfind = AutoBuilder.pathfindToPose(algaeScoreTargerPose, pathFindConstraints, 1);
+    private final Command algaeScorePathfind = AutoBuilder.pathfindToPose(algaeScoreTargetPose, pathFindConstraints, 1);
     
     private final SendableChooser<Command> autoChooser;
 
@@ -118,6 +119,8 @@ public class RobotContainer {
     public RobotContainer() {
         
         /* Put autonomous chooser on dashboard */
+        RegisterNamedCommands();
+        
         autoChooser = AutoBuilder.buildAutoChooser("Tests");
         SmartDashboard.putData("Auto Mode", autoChooser);
 
@@ -126,7 +129,8 @@ public class RobotContainer {
         SmartDashboard.putData("Pathfind to Nearest AprilTag", new InstantCommand(() -> tagAlign.pathfindToNearestAprilTagOld(false).schedule()));
 
         configureBindings();
-        RegisterNamedCommands();
+
+        SmartDashboard.putBoolean("Enable MegaTag2", false);
     }
 
     private void configureBindings() {
@@ -136,10 +140,15 @@ public class RobotContainer {
         drivetrain.setDefaultCommand(new TeleOpDrive());
 
         // reset the field-centric heading on start button press
-        pilot.start().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+        pilot.start().onTrue(drivetrain.runOnce(drivetrain::seedFieldCentric));
 
-        pilot.b().whileTrue(tagAlign.pathfindToNearestAprilTag(true));
-        pilot.x().whileTrue(tagAlign.pathfindToNearestAprilTag(false));
+
+        pilot.b().whileTrue(tagAlign.pathfindToNearestCoralReefAprilTag(true));
+        pilot.x().whileTrue(tagAlign.pathfindToNearestCoralReefAprilTag(false));
+        pilot.y().whileTrue(tagAlign.pathfindToNearestAlgaeReefAprilTag());
+        pilot.a().whileTrue(tagAlign.pathfindToNearestAlgaeProcAprilTag());
+        pilot.povUp().whileTrue(tagAlign.pathfindToNearestCoralStationAprilTag());
+        pilot.povDown().whileTrue(tagAlign.pathfindToNearestBargeAprilTag());
         
         drivetrain.registerTelemetry(logger::telemeterize);
           
@@ -152,89 +161,125 @@ public class RobotContainer {
         // Max travel is 29in 
 
         //ELEVATOR
-        elevator.setDefaultCommand(new RunElevator(() -> Math.abs(Copilot.getRightY() * .5)));
+        elevator.setDefaultCommand(new RunElevator(() -> Math.abs(Copilot.getRightY() * ElevatorConstants.ELEVATOR_CONTROL_SCALE)));
         Copilot.start().onTrue(new InstantCommand(() -> elevator.ResetElevatorEncoders()));
         
         
         //ALGAE INTAKE
-        Copilot.leftBumper().whileTrue(new RunAlgaeIntake(() -> 1.0));
-        Copilot.rightBumper().whileTrue(new RunAlgaeIntake(() -> -.2)).onFalse(new RunAlgaeIntake(() -> 1.0).withTimeout(1));
+        Copilot.leftBumper().whileTrue(new RunAlgaeIntake(() -> IntakeConstants.ALGAE_INTAKE_SPEED));
+        // Copilot.rightBumper().whileTrue(new RunAlgaeIntake(() -> IntakeConstants.ALGAE_OUTTAKE_SPEED)).onFalse(new RunAlgaeIntake(() -> IntakeConstants.ALGAE_INTAKE_SPEED).withTimeout(1));
 
+        Copilot.rightBumper().toggleOnTrue(new RunAlgaeIntake(() -> IntakeConstants.ALGAE_INTAKE_SPEED));
+        Copilot.rightBumper().toggleOnFalse(new RunAlgaeIntake(() -> IntakeConstants.ALGAE_OUTTAKE_SPEED).withTimeout(1));
 
         //CORAL INTAKE
-        coralIntake.setDefaultCommand(new RunCoralIntake(()-> Copilot.getLeftTriggerAxis()-Copilot.getRightTriggerAxis()));
+        coralIntake.setDefaultCommand(new RunCoralIntake(()-> Copilot.getRightTriggerAxis()-Copilot.getLeftTriggerAxis()));
         // Copilot.povRight().whileTrue(new CenterCoral());
 
         //WRIST
         wrist.setDefaultCommand(new RunWrist(() -> Copilot.getLeftY()));
         //Climb
-        Copilot.povLeft().whileTrue(climb.RunClimbCommand(() -> 0.25));
-        Copilot.povRight().whileTrue(climb.RunClimbCommand(() -> -0.25));
+        pilot.povLeft().whileTrue(climb.RunClimbCommand(() -> ClimbConstants.CLIMB_SPEED));
+        pilot.povRight().whileTrue(climb.RunClimbCommand(() -> -ClimbConstants.CLIMB_SPEED));
         
 
         //ELEVATOR SETPOINTS
         //
         Copilot.povDown().onTrue( //Home position (does work)
             new SequentialCommandGroup(
-                elevator.GetLeftElevatorPosition() > 1 && elevator.GetLeftElevatorPosition() < 4.5 && wrist.GetWristEncoderPosition() > 18 ? 
+                elevator.GetLeftElevatorPosition() > ElevatorConstants.MIN_ELEVATOR_SAFETY_THRESHOLD && 
+                elevator.GetLeftElevatorPosition() < ElevatorConstants.MAX_ELEVATOR_SAFETY_THRESHOLD && 
+                wrist.GetWristEncoderPosition() > WristConstants.WRIST_SAFETY_THRESHOLD ? 
                    new SequentialCommandGroup(
-                       new SequentialElevatorSetpoint(6), 
-                       new ParallelDeadlineGroup(new SetWristToPosition(0), new SetElevatorToPosition(6)),
+                       new SequentialElevatorSetpoint(ElevatorConstants.ALGAE_PROCESSOR_POSITION), 
+                       new ParallelDeadlineGroup(new SetWristToPosition(WristConstants.HOME_POSITION), new SetElevatorToPosition(ElevatorConstants.ALGAE_PROCESSOR_POSITION)),
                        new InstantCommand(() -> elevator.StopElevator())
                    ) : 
                    new ParallelDeadlineGroup(
-                       new SetWristToPosition(0),
-                       new SequentialElevatorSetpoint(0)
+                       new SetWristToPosition(WristConstants.HOME_POSITION),
+                       new SequentialElevatorSetpoint(ElevatorConstants.HOME_POSITION)
                    )
             )
         );
         
         Copilot.x().onTrue(new SequentialCommandGroup( //L2 CORAL SCORING
-            new SequentialElevatorSetpoint(8),
+            new SequentialElevatorSetpoint(ElevatorConstants.L2_SCORE_POSITION),
             new ParallelCommandGroup(
-                new SetElevatorToPosition(8),
-                new SetWristToPosition(5.8)
+                new SetElevatorToPosition(ElevatorConstants.L2_SCORE_POSITION),
+                new SetWristToPosition(WristConstants.L2_SCORE_POSITION)
             )
         ));
 
         Copilot.y().onTrue(new SequentialCommandGroup( //L3 SCORING
-            new SequentialElevatorSetpoint(14.8),
+            new SequentialElevatorSetpoint(ElevatorConstants.L3_SCORE_POSITION),
             new ParallelCommandGroup(
-                new SetElevatorToPosition(14.8),
-                new SetWristToPosition(5.8)
+                new SetElevatorToPosition(ElevatorConstants.L3_SCORE_POSITION),
+                new SetWristToPosition(WristConstants.L3_SCORE_POSITION)
             )
+        ));
+
+        // Copilot.b().onTrue(new SequentialCommandGroup( //L4 SCORING
+        //      new SequentialElevatorSetpoint(ElevatorConstants.L4_SCORE_POSITION),
+        //     new ParallelCommandGroup(
+        //         new SetElevatorToPosition(ElevatorConstants.L4_SCORE_POSITION),
+        //         new SetWristToPosition(WristConstants.L4_SCORE_POSITION)
+        //     )
+        // ));
+        
+        Copilot.b().toggleOnTrue(new SequentialCommandGroup( //L4 SCORING
+             new SequentialElevatorSetpoint(ElevatorConstants.L4_SCORE_POSITION),
+            new ParallelCommandGroup(
+                new SetElevatorToPosition(ElevatorConstants.L4_SCORE_POSITION),
+                new SetWristToPosition(WristConstants.L4_SCORE_POSITION)
+            )
+        ));
+        Copilot.b().toggleOnFalse(new SequentialCommandGroup( //L4 SCORING
+            new ParallelRaceGroup(
+                new SetElevatorToPosition(ElevatorConstants.L4_SCORE_POSITION),
+                new SequentialWristSetpoint(WristConstants.HOME_POSITION)
+            ),
+            new SetElevatorToPosition(ElevatorConstants.HOME_POSITION)
         ));
 
         Copilot.a().and(Copilot.x()).onTrue(new ParallelCommandGroup(
-            new SetElevatorToPosition(12),
-            new SetWristToPosition(12.5) //this one should be good 
+            new SetElevatorToPosition(ElevatorConstants.L2_ALGAE_POSITION),
+            new SetWristToPosition(WristConstants.L2_ALGAE_POSITION) //L2 
         ));
         Copilot.a().and(Copilot.y()).onTrue(new ParallelCommandGroup(
-            new SetElevatorToPosition(14.6),
-            new SetWristToPosition(10) //check this value
+            new SetElevatorToPosition(ElevatorConstants.L3_ALGAE_POSITION),
+            new SetWristToPosition(WristConstants.L3_ALGAE_POSITION) //L3
         ));
         Copilot.a().and(Copilot.b()).onTrue(new ParallelCommandGroup(
-            new SetElevatorToPosition(24.7),
-            new SetWristToPosition(3) //check this value
+            new SetElevatorToPosition(ElevatorConstants.BARGE_POSITION),
+            new SetWristToPosition(WristConstants.BARGE_POSITION) //Barge
         ));
+        Copilot.a().and(Copilot.povUp()).onTrue(new ParallelCommandGroup(
+            new SetElevatorToPosition(ElevatorConstants.ALGAE_PROCESSOR_POSITION),
+            new SetWristToPosition(WristConstants.ALGAE_PROCESSOR_POSITION) //Algae Processor
+        ));
+        Copilot.a().and(Copilot.povDown()).onTrue(new ParallelCommandGroup(
+            new SetElevatorToPosition(ElevatorConstants.FLOOR_LOAD_POSITION),
+            new SetWristToPosition(WristConstants.FLOOR_POSITION) //Algae Floor Load
+        ));
+    
 
         // Copilot.povRight().onTrue(new SequentialCommandGroup( //L4 SCORING VALUES
-        // new SequentialElevatorSetpoint(20),
+        // new SequentialElevatorSetpoint(ElevatorConstants.L4_SCORE_POSITION),
         // new ParallelCommandGroup(
-        //     new SetElevatorToPosition(20),
-        //     new SetWristToPosition(5.8) 
+        //     new SetElevatorToPosition(ElevatorConstants.L4_SCORE_POSITION),
+        //     new SetWristToPosition(WristConstants.L4_SCORE_POSITION) 
         // )
         // ));
 
-        Copilot.povUp().onTrue(new SequentialCommandGroup( //CORAL STATION VALUES
-            new SequentialElevatorSetpoint(12.8),
+        Copilot.povUp().and(Copilot.a().negate()).onTrue(new SequentialCommandGroup( //CORAL STATION VALUES
+            new SequentialElevatorSetpoint(ElevatorConstants.CORAL_STATION_POSITION),
             new ParallelCommandGroup(
-                new SetElevatorToPosition(12.8),
-                new SetWristToPosition(20.1) 
+                new SetElevatorToPosition(ElevatorConstants.CORAL_STATION_POSITION),
+                new SetWristToPosition(WristConstants.CORAL_STATION_POSITION) 
             )
         ));
 
-        Copilot.back().onTrue(new SequentialCommandGroup(new RunCoralIntake(() -> -.2).withTimeout(.15), new RunCoralIntake(() -> .2).withTimeout(.15), new RunCoralIntake(() -> -.2).withTimeout(.15), new RunCoralIntake(() -> .2).withTimeout(.15), new RunCoralIntake(() -> 0.0).withTimeout(0.15)));
+        Copilot.back().onTrue(new SequentialCommandGroup(new RunCoralIntake(() -> IntakeConstants.CORAL_OUTTAKE_SPEED).withTimeout(.15), new RunCoralIntake(() -> IntakeConstants.CORAL_INTAKE_SPEED).withTimeout(.15), new RunCoralIntake(() -> IntakeConstants.CORAL_OUTTAKE_SPEED).withTimeout(.15), new RunCoralIntake(() -> IntakeConstants.CORAL_INTAKE_SPEED).withTimeout(.15), new RunCoralIntake(() -> 0.0).withTimeout(0.15)));
     }
 
     public Command getAutonomousCommand() {
@@ -242,8 +287,48 @@ public class RobotContainer {
         return autoChooser.getSelected();
     }
 
-  
+    private void RegisterNamedCommands(){
+        /* Pathplanner named commands for the pathplanner app. TODO: make this a function */
+        NamedCommands.registerCommand("TestCommand", algaeScorePathfind);
+
+        NamedCommands.registerCommand("Elevator L3 Score", ElevatorL3Score());
+
+        NamedCommands.registerCommand("Elevator L4 Score", ElevatorL4Score());
+        NamedCommands.registerCommand("Drive to Nearest Right Reef", tagAlign.pathfindToNearestCoralReefAprilTag(true));
     }
+
+    public Command ElevatorL3Score(){
+        return new SequentialCommandGroup(
+            new SequentialElevatorSetpoint(ElevatorConstants.L3_SCORE_POSITION),
+            new ParallelRaceGroup(
+                new SetElevatorToPosition(ElevatorConstants.L3_SCORE_POSITION),
+                new SequentialWristSetpoint(WristConstants.L3_SCORE_POSITION)
+            ),
+            new ParallelRaceGroup(
+                new SetElevatorToPosition(ElevatorConstants.L3_SCORE_POSITION),
+                new SetWristToPosition(WristConstants.L3_SCORE_POSITION),
+                new RunCoralIntake(() -> IntakeConstants.CORAL_INTAKE_SPEED).withTimeout(2)
+            ),
+            new SequentialWristSetpoint(WristConstants.HOME_POSITION)
+        );
+    }
+
+    public Command ElevatorL4Score(){
+        return new SequentialCommandGroup(
+            new SequentialElevatorSetpoint(ElevatorConstants.L4_SCORE_POSITION),
+            new ParallelRaceGroup(
+                new SetElevatorToPosition(ElevatorConstants.L4_SCORE_POSITION),
+                new SequentialWristSetpoint(WristConstants.L4_SCORE_POSITION)
+            ),
+            new ParallelRaceGroup(
+                new SetElevatorToPosition(ElevatorConstants.L4_SCORE_POSITION),
+                new SetWristToPosition(WristConstants.L4_SCORE_POSITION),
+                new RunCoralIntake(() -> IntakeConstants.CORAL_INTAKE_SPEED).withTimeout(2)
+            ),
+            new SequentialWristSetpoint(WristConstants.HOME_POSITION)
+        );
+    }
+
 
     // public Pose2d to2dPose(Pose3d pose3d) {
     //     // Extract x and y components from the Translation3d
