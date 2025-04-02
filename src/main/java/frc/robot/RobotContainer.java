@@ -98,24 +98,6 @@ public class RobotContainer {
     public static final Climb climb = new Climb();
     public static final AlignmentSystem tagAlign = new AlignmentSystem(drivetrain);
 
-    private void RegisterNamedCommands(){
-        /* Pathplanner named commands for the pathplanner app. TODO: make this a function */
-        NamedCommands.registerCommand("TestCommand", algaeScorePathfind);
-
-        NamedCommands.registerCommand("Elevator L3 Score", new SequentialCommandGroup(
-            new SequentialElevatorSetpoint(14.8),
-            new ParallelRaceGroup(
-                new SetElevatorToPosition(14.8),
-                new SequentialWristSetpoint(5.8)
-            ),
-            new ParallelRaceGroup(
-                new SetElevatorToPosition(14.8),
-                new SetWristToPosition(5.8),
-                new RunCoralIntake(() -> 0.3).withTimeout(2)
-            ),
-            new SequentialWristSetpoint(0)
-        ));
-    }
     public RobotContainer() {
         
         /* Put autonomous chooser on dashboard */
@@ -294,6 +276,9 @@ public class RobotContainer {
         NamedCommands.registerCommand("Elevator L3 Score", ElevatorL3Score());
 
         NamedCommands.registerCommand("Elevator L4 Score", ElevatorL4Score());
+
+        NamedCommands.registerCommand("Coral Station Pickup", CoralStationPickup());
+
         NamedCommands.registerCommand("Drive to Nearest Right Reef", tagAlign.pathfindToNearestCoralReefAprilTag(true));
     }
 
@@ -328,6 +313,21 @@ public class RobotContainer {
             new SequentialWristSetpoint(WristConstants.HOME_POSITION)
         );
     }
+
+    public Command CoralStationPickup(){
+        return new SequentialCommandGroup(
+            new SequentialElevatorSetpoint(ElevatorConstants.CORAL_STATION_POSITION),
+            new ParallelRaceGroup(
+                new SetElevatorToPosition(ElevatorConstants.CORAL_STATION_POSITION),
+                new SequentialWristSetpoint(WristConstants.CORAL_STATION_POSITION)
+            ),
+            new SequentialCommandGroup(
+                new RunCoralIntake(() -> IntakeConstants.CORAL_INTAKE_SPEED).withTimeout(2)
+            ),
+            new SequentialWristSetpoint(WristConstants.HOME_POSITION)
+        );
+    }
+}
 
 
     // public Pose2d to2dPose(Pose3d pose3d) {
