@@ -1,0 +1,87 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "L4 PROC Arrive"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "L4 Arrive"
+          }
+        },
+        {
+          "type": "race",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "L4 PROC Score"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "L4 Hold"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "L4 Score"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "L4 Backoff and Home"
+          }
+        },
+        {
+          "type": "sequential",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "STATION PROC Arrive"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Coral Station Arrive"
+                }
+              },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "STATION PROC Park"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Coral Station Grab"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": false,
+  "folder": null,
+  "choreoAuto": false
+}

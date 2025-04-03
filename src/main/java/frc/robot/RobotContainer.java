@@ -98,6 +98,8 @@ public class RobotContainer {
     public static final Climb climb = new Climb();
     public static final AlignmentSystem tagAlign = new AlignmentSystem(drivetrain);
 
+    public static boolean readyFlipWristL4 = false;
+
     public RobotContainer() {
         
         /* Put autonomous chooser on dashboard */
@@ -148,11 +150,11 @@ public class RobotContainer {
         
         
         //ALGAE INTAKE
-        Copilot.leftBumper().whileTrue(new RunAlgaeIntake(() -> IntakeConstants.ALGAE_INTAKE_SPEED));
-        // Copilot.rightBumper().whileTrue(new RunAlgaeIntake(() -> IntakeConstants.ALGAE_OUTTAKE_SPEED)).onFalse(new RunAlgaeIntake(() -> IntakeConstants.ALGAE_INTAKE_SPEED).withTimeout(1));
+        Copilot.leftBumper().whileTrue(new RunAlgaeIntake(() -> IntakeConstants.ALGAE_OUTTAKE_SPEED));
+        Copilot.rightBumper().whileTrue(new RunAlgaeIntake(() -> IntakeConstants.ALGAE_INTAKE_SPEED)).onFalse(new RunAlgaeIntake(() -> IntakeConstants.ALGAE_OUTTAKE_SPEED).withTimeout(1));
 
-        Copilot.rightBumper().toggleOnTrue(new RunAlgaeIntake(() -> IntakeConstants.ALGAE_INTAKE_SPEED));
-        Copilot.rightBumper().toggleOnFalse(new RunAlgaeIntake(() -> IntakeConstants.ALGAE_OUTTAKE_SPEED).withTimeout(1));
+        // Copilot.rightBumper().onTrue(new RunAlgaeIntake(() -> IntakeConstants.ALGAE_INTAKE_SPEED));
+        // Copilot.rightBumper().toggleOnFalse(new RunAlgaeIntake(() -> IntakeConstants.ALGAE_OUTTAKE_SPEED).withTimeout(1));
 
         //CORAL INTAKE
         coralIntake.setDefaultCommand(new RunCoralIntake(()-> Copilot.getRightTriggerAxis()-Copilot.getLeftTriggerAxis()));
@@ -200,28 +202,28 @@ public class RobotContainer {
             )
         ));
 
-        // Copilot.b().onTrue(new SequentialCommandGroup( //L4 SCORING
+        Copilot.b().onTrue(new SequentialCommandGroup( //L4 SCORING
+            new SequentialElevatorSetpoint(ElevatorConstants.L4_SCORE_POSITION),
+            new ParallelCommandGroup(
+                new SetElevatorToPosition(ElevatorConstants.L4_SCORE_POSITION),
+                new SetWristToPosition(WristConstants.L4_SCORE_POSITION)
+            )
+        ));
+        
+        // Copilot.b().toggleOnTrue(new SequentialCommandGroup( //L4 SCORING
         //      new SequentialElevatorSetpoint(ElevatorConstants.L4_SCORE_POSITION),
         //     new ParallelCommandGroup(
         //         new SetElevatorToPosition(ElevatorConstants.L4_SCORE_POSITION),
         //         new SetWristToPosition(WristConstants.L4_SCORE_POSITION)
         //     )
         // ));
-        
-        Copilot.b().toggleOnTrue(new SequentialCommandGroup( //L4 SCORING
-             new SequentialElevatorSetpoint(ElevatorConstants.L4_SCORE_POSITION),
-            new ParallelCommandGroup(
-                new SetElevatorToPosition(ElevatorConstants.L4_SCORE_POSITION),
-                new SetWristToPosition(WristConstants.L4_SCORE_POSITION)
-            )
-        ));
-        Copilot.b().toggleOnFalse(new SequentialCommandGroup( //L4 SCORING
-            new ParallelRaceGroup(
-                new SetElevatorToPosition(ElevatorConstants.L4_SCORE_POSITION),
-                new SequentialWristSetpoint(WristConstants.HOME_POSITION)
-            ),
-            new SetElevatorToPosition(ElevatorConstants.HOME_POSITION)
-        ));
+        // Copilot.b().toggleOnFalse(new SequentialCommandGroup( //L4 SCORING
+        //     new ParallelRaceGroup(
+        //         new SetElevatorToPosition(ElevatorConstants.L4_SCORE_POSITION),
+        //         new SequentialWristSetpoint(WristConstants.HOME_POSITION)
+        //     ),
+        //     new SetElevatorToPosition(ElevatorConstants.HOME_POSITION)
+        // ));
 
         Copilot.a().and(Copilot.x()).onTrue(new ParallelCommandGroup(
             new SetElevatorToPosition(ElevatorConstants.L2_ALGAE_POSITION),
@@ -277,9 +279,16 @@ public class RobotContainer {
 
         NamedCommands.registerCommand("Elevator L4 Score", ElevatorL4Score());
 
-        NamedCommands.registerCommand("Coral Station Pickup", CoralStationPickup());
-
         NamedCommands.registerCommand("Drive to Nearest Right Reef", tagAlign.pathfindToNearestCoralReefAprilTag(true));
+    
+        NamedCommands.registerCommand("L4 Arrive", L4Arrive());
+        NamedCommands.registerCommand("L4 Hold", L4Hold());
+        NamedCommands.registerCommand("L4 Score", L4Score());
+        NamedCommands.registerCommand("L4 Arrive", L4Arrive());
+        NamedCommands.registerCommand("L4 Backoff and Home", BackoffL4andHome());
+
+        NamedCommands.registerCommand("Coral Station Arrive", CoralStationArrive());
+        NamedCommands.registerCommand("Coral Station Grab", CoralStationGrab());
     }
 
     public Command ElevatorL3Score(){
@@ -287,14 +296,19 @@ public class RobotContainer {
             new SequentialElevatorSetpoint(ElevatorConstants.L3_SCORE_POSITION),
             new ParallelRaceGroup(
                 new SetElevatorToPosition(ElevatorConstants.L3_SCORE_POSITION),
-                new SequentialWristSetpoint(WristConstants.L3_SCORE_POSITION)
+                new SequentialWristSetpoint(WristConstants.L3_SCORE_POSITION).withTimeout(3.5)
             ),
             new ParallelRaceGroup(
                 new SetElevatorToPosition(ElevatorConstants.L3_SCORE_POSITION),
                 new SetWristToPosition(WristConstants.L3_SCORE_POSITION),
-                new RunCoralIntake(() -> IntakeConstants.CORAL_INTAKE_SPEED).withTimeout(2)
+                new RunCoralIntake(() -> IntakeConstants.CORAL_OUTTAKE_SPEED).withTimeout(2)
             ),
-            new SequentialWristSetpoint(WristConstants.HOME_POSITION)
+            new ParallelRaceGroup(
+                new SequentialWristSetpoint(WristConstants.HOME_POSITION),
+                new SetElevatorToPosition(ElevatorConstants.HOME_POSITION)
+            )
+            
+
         );
     }
 
@@ -303,28 +317,68 @@ public class RobotContainer {
             new SequentialElevatorSetpoint(ElevatorConstants.L4_SCORE_POSITION),
             new ParallelRaceGroup(
                 new SetElevatorToPosition(ElevatorConstants.L4_SCORE_POSITION),
-                new SequentialWristSetpoint(WristConstants.L4_SCORE_POSITION)
+                new SequentialWristSetpoint(WristConstants.L4_SCORE_POSITION).withTimeout(3.5)
             ),
             new ParallelRaceGroup(
                 new SetElevatorToPosition(ElevatorConstants.L4_SCORE_POSITION),
                 new SetWristToPosition(WristConstants.L4_SCORE_POSITION),
-                new RunCoralIntake(() -> IntakeConstants.CORAL_INTAKE_SPEED).withTimeout(2)
+                new RunCoralIntake(() -> IntakeConstants.CORAL_OUTTAKE_SPEED).withTimeout(2)
             ),
-            new SequentialWristSetpoint(WristConstants.HOME_POSITION)
+            new ParallelRaceGroup(
+                new SequentialWristSetpoint(WristConstants.HOME_POSITION),
+                new SetElevatorToPosition(ElevatorConstants.L4_SCORE_POSITION)
+            ),
+            new SetElevatorToPosition(ElevatorConstants.HOME_POSITION).withTimeout(2)
+            
         );
     }
 
-    public Command CoralStationPickup(){
+    public Command L4Arrive(){
+        return new SequentialCommandGroup(
+            new SequentialElevatorSetpoint(ElevatorConstants.L4_SCORE_POSITION),
+            new ParallelRaceGroup(
+                new SetElevatorToPosition(ElevatorConstants.L4_SCORE_POSITION),
+                new SequentialWristSetpoint(WristConstants.L4_SCORE_POSITION).withTimeout(3.5)
+            )
+        );
+    }
+    public Command L4Hold(){
+        return new ParallelCommandGroup(
+            new SetElevatorToPosition(ElevatorConstants.L4_SCORE_POSITION),
+            new SetWristToPosition(WristConstants.L4_SCORE_POSITION),
+            new RunCoralIntake(() -> IntakeConstants.CORAL_INTAKE_SPEED).withTimeout(.15)
+        );
+    }
+    public Command L4Score(){
+        return new ParallelRaceGroup(
+            new SetElevatorToPosition(ElevatorConstants.L4_SCORE_POSITION),
+            new SetWristToPosition(WristConstants.L4_SCORE_POSITION),
+            new RunCoralIntake(() -> IntakeConstants.CORAL_OUTTAKE_SPEED).withTimeout(2)
+        );
+    }
+    public Command BackoffL4andHome(){
+        return new SequentialCommandGroup(
+            new ParallelRaceGroup(
+                new SequentialWristSetpoint(WristConstants.HOME_POSITION).withTimeout(2),
+                new SetElevatorToPosition(ElevatorConstants.L4_SCORE_POSITION)
+            ),
+            new SetElevatorToPosition(ElevatorConstants.HOME_POSITION).withTimeout(.75)
+        );
+    }
+    public Command CoralStationArrive(){
         return new SequentialCommandGroup(
             new SequentialElevatorSetpoint(ElevatorConstants.CORAL_STATION_POSITION),
             new ParallelRaceGroup(
                 new SetElevatorToPosition(ElevatorConstants.CORAL_STATION_POSITION),
-                new SequentialWristSetpoint(WristConstants.CORAL_STATION_POSITION)
-            ),
-            new SequentialCommandGroup(
-                new RunCoralIntake(() -> IntakeConstants.CORAL_INTAKE_SPEED).withTimeout(2)
-            ),
-            new SequentialWristSetpoint(WristConstants.HOME_POSITION)
+                new SequentialWristSetpoint(WristConstants.CORAL_STATION_POSITION).withTimeout(3.5)
+            )
+        );
+    }
+    public Command CoralStationGrab(){
+        return new ParallelRaceGroup(
+            new SetElevatorToPosition(ElevatorConstants.L4_SCORE_POSITION),
+            new SetWristToPosition(WristConstants.L4_SCORE_POSITION),
+            new RunCoralIntake(() -> IntakeConstants.CORAL_INTAKE_SPEED).withTimeout(5)
         );
     }
 }

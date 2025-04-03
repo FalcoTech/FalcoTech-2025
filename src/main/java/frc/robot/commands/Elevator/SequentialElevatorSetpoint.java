@@ -28,7 +28,7 @@ public class SequentialElevatorSetpoint extends Command {
   @Override
   public void execute() {
     if (Position < m_Elevator.GetLeftElevatorPosition()){
-      m_Elevator.MoveElevator(() -> ElevatorConstants.LOWER_ELEVATOR_SPEED );
+      m_Elevator.MoveElevator(() -> ElevatorConstants.LOWER_ELEVATOR_SPEED);
     } else {
       m_Elevator.MoveElevatorToPosition(Position);
     }
