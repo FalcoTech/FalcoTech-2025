@@ -56,6 +56,7 @@ public final class Constants {
     // Safety thresholds for home position logic
     public static final double MIN_ELEVATOR_SAFETY_THRESHOLD = 1.0;
     public static final double MAX_ELEVATOR_SAFETY_THRESHOLD = 4.5;
+    public static final double PID_OUTPUT_LIMIT = 0.2;
   }
   
   public static final class WristConstants {

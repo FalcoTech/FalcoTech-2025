@@ -145,6 +145,7 @@ public class RobotContainer {
         // Max travel is 29in 
 
         //ELEVATOR
+        //elevator.setDefaultCommand(new RunElevator(() -> Copilot.getRightY() * ElevatorConstants.ELEVATOR_CONTROL_SCALE)));
         elevator.setDefaultCommand(new RunElevator(() -> Math.abs(Copilot.getRightY() * ElevatorConstants.ELEVATOR_CONTROL_SCALE)));
         Copilot.start().onTrue(new InstantCommand(() -> elevator.ResetElevatorEncoders()));
         

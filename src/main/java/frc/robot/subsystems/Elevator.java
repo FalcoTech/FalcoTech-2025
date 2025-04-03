@@ -26,6 +26,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.ElevatorConstants;
 
 public class Elevator extends SubsystemBase {
   private final SparkMax LeftElevatorMotor = new SparkMax(20, MotorType.kBrushless);
@@ -67,12 +68,19 @@ public class Elevator extends SubsystemBase {
   }
 
   public void MoveElevator(Supplier<Double> speed){
+    // Create a fixed speed for the elevator when going down
+
+    // if (speed.get() < 0){
+    //   speed = () -> (ElevatorConstants.LOWER_ELEVATOR_SPEED);
+    // }
     LeftElevatorMotor.set(speed.get());
   }
 
   public void MoveElevatorToPosition(double position){
     double PIDOutput = ElevatorPID.calculate(GetLeftElevatorPosition(), position) + ElevatorFF.calculate(position);
-    double CommandedOutput = Math.copySign(Math.min(Math.abs(PIDOutput), .2), PIDOutput);
+    double CommandedOutput = Math.copySign(Math.min(Math.abs(PIDOutput), 0.2), PIDOutput);
+    // double CommandedOutput = Math.copySign(Math.min(Math.abs(PIDOutput), ElevatorConstants.PID_OUTPUT_LIMIT), PIDOutput);
+    // @Gavin - Is this why the elevator is moving so slow?!!!
     LeftElevatorMotor.set(CommandedOutput);
     // SmartDashboard.putNumber("Elevator Motor Output", ElevatorPID.calculate(GetLeftElevatorPosition(), position) + ElevatorFF.calculate(1, 1));
   }
