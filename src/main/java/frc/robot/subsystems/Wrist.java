@@ -25,6 +25,8 @@ import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.WristConstants;
+import edu.wpi.first.math.MathUtil;
 
 public class Wrist extends SubsystemBase {
   private final TalonFX WristMotor = new TalonFX(30);
@@ -60,6 +62,7 @@ public class Wrist extends SubsystemBase {
   public void MoveWristToPosition(double position){
     // angle in radians = (sensor*(pi/20)) - pi/2
     double PIDOutput = m_PIDController.calculate(GetWristEncoderPosition(), position); //TODO : Tune offset and velocity;
+    // double CommandedOutput = MathUtil.clamp(PIDOutput, -WristConstants.PID_OUTPUT_LIMIT, WristConstants.PID_OUTPUT_LIMIT);
     double CommandedOutput = Math.copySign(Math.min(Math.abs(PIDOutput), .2), PIDOutput);
     WristMotor.set(CommandedOutput);
     // SmartDashboard.putNumber("Wrist Motor Output", m_PIDController.calculate(GetWristEncoderPosition(), position));
