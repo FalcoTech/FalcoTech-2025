@@ -88,6 +88,7 @@ public final class Constants {
     
     public static final double CORAL_INTAKE_SPEED = 0.3;
     public static final double CORAL_OUTTAKE_SPEED = -0.2;
+    public static final double CORAL_SHIMMY_SPEED = 0.2;
   }
   
   public static final class ClimbConstants {

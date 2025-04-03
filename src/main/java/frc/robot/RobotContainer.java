@@ -155,6 +155,7 @@ public class RobotContainer {
         Copilot.leftBumper().whileTrue(new RunAlgaeIntake(() -> IntakeConstants.ALGAE_OUTTAKE_SPEED));
         Copilot.rightBumper().whileTrue(new RunAlgaeIntake(() -> IntakeConstants.ALGAE_INTAKE_SPEED)).onFalse(new RunAlgaeIntake(() -> IntakeConstants.ALGAE_OUTTAKE_SPEED).withTimeout(1));
 
+        // HEY DON'T FORGET TO UNCOMMENT THIS IF IT WORKS
         // Copilot.rightBumper().onTrue(new RunAlgaeIntake(() -> IntakeConstants.ALGAE_INTAKE_SPEED));
         // Copilot.rightBumper().toggleOnFalse(new RunAlgaeIntake(() -> IntakeConstants.ALGAE_OUTTAKE_SPEED).withTimeout(1));
 
@@ -266,7 +267,7 @@ public class RobotContainer {
             )
         ));
 
-        Copilot.back().onTrue(new SequentialCommandGroup(new RunCoralIntake(() -> IntakeConstants.CORAL_OUTTAKE_SPEED).withTimeout(.15), new RunCoralIntake(() -> IntakeConstants.CORAL_INTAKE_SPEED).withTimeout(.15), new RunCoralIntake(() -> IntakeConstants.CORAL_OUTTAKE_SPEED).withTimeout(.15), new RunCoralIntake(() -> IntakeConstants.CORAL_INTAKE_SPEED).withTimeout(.15), new RunCoralIntake(() -> 0.0).withTimeout(0.15)));
+        Copilot.back().onTrue(new SequentialCommandGroup(new RunCoralIntake(() -> -IntakeConstants.CORAL_SHIMMY_SPEED).withTimeout(.15), new RunCoralIntake(() -> IntakeConstants.CORAL_SHIMMY_SPEED).withTimeout(.15), new RunCoralIntake(() -> -IntakeConstants.CORAL_SHIMMY_SPEED).withTimeout(.15), new RunCoralIntake(() -> IntakeConstants.CORAL_SHIMMY_SPEED).withTimeout(.15), new RunCoralIntake(() -> 0.0).withTimeout(0.15)));
     }
 
     public Command getAutonomousCommand() {
