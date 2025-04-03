@@ -203,7 +203,7 @@ public Command pathfindToNearestCoralStationAprilTag(double lateralOffset) {
       // This lambda runs when the command is actually scheduled (button pressed)
       // this.offsetRight = offsetRight;
       targetTag = getNearestTag(coralStationTags);
-      targetPose = getTargetPose(targetTag,AlignmentConstants.CORAL_FORWARD_DISTANCE, lateralOffset);
+      targetPose = getTargetPose(targetTag,AlignmentConstants.CORAL_STATION_FORWARD_OFFSET, lateralOffset);
       
       // Return the actual command to be run
       return AutoBuilder.pathfindToPose(targetPose, m_pathConstraints, 0);
@@ -211,6 +211,21 @@ public Command pathfindToNearestCoralStationAprilTag(double lateralOffset) {
 
 }
 
+public Command pathfindToNearestCoralStationAprilTag() {
+  // Use a ProxyCommand to defer creation until execution time
+  return Commands.defer(
+    () -> {
+      // This lambda runs when the command is actually scheduled (button pressed)
+      AprilTag targetTag = getNearestTag(coralStationTags);
+      // Use default lateral offset if not specified
+      targetPose = getTargetPose(targetTag,AlignmentConstants.CORAL_STATION_FORWARD_OFFSET,AlignmentConstants.CORAL_STATION_LATERAL_OFFSET);
+
+      
+      // Return the actual command to be run
+      return AutoBuilder.pathfindToPose(targetPose, m_pathConstraints, 0);
+  }, Set.of(this));
+
+}
 
 public Command pathfindToNearestAlgaeReefAprilTag() {
   // Use a ProxyCommand to defer creation until execution time
@@ -238,19 +253,7 @@ public Command pathfindToNearestAlgaeProcAprilTag() {
   }, Set.of(this));
 
 }
-public Command pathfindToNearestCoralStationAprilTag() {
-  // Use a ProxyCommand to defer creation until execution time
-  return Commands.defer(
-    () -> {
-      // This lambda runs when the command is actually scheduled (button pressed)
-      AprilTag targetTag = getNearestTag(coralStationTags);
-      targetPose = getTargetPose(targetTag,AlignmentConstants.CORAL_STATION_FORWARD_OFFSET,AlignmentConstants.CORAL_STATION_LATERAL_OFFSET);
-      
-      // Return the actual command to be run
-      return AutoBuilder.pathfindToPose(targetPose, m_pathConstraints, 0);
-  }, Set.of(this));
 
-}
 public Command pathfindToNearestBargeAprilTag() {
   // Use a ProxyCommand to defer creation until execution time
   return Commands.defer(
