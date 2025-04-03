@@ -7,7 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "L4 MID Arrive"
+            "pathName": "L4 FAR Arrive"
           }
         },
         {
@@ -23,7 +23,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "L4 MID Score"
+                  "pathName": "L4 FAR Score"
                 }
               },
               {
