@@ -7,6 +7,7 @@ package frc.robot.commands.Elevator;
 import java.util.function.Supplier;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.Constants.ElevatorConstants;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.Elevator;
 
@@ -36,6 +37,7 @@ public class SetElevatorToPosition extends Command {
   public void execute() {
     if (Position < m_Elevator.GetLeftElevatorPosition()){
       m_Elevator.StopElevator();
+      // m_Elevator.MoveElevator(() -> ElevatorConstants.LOWER_ELEVATOR_SPEED);
     } else {
       m_Elevator.MoveElevatorToPosition(Position);
     }

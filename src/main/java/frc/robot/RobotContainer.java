@@ -35,6 +35,7 @@ import frc.robot.commands.Coral.RunCoralIntake;
 import frc.robot.commands.Elevator.RunElevator;
 import frc.robot.commands.Elevator.SequentialElevatorSetpoint;
 import frc.robot.commands.Elevator.SetElevatorToPosition;
+import frc.robot.commands.Swerve.RumbleCommand;
 import frc.robot.commands.Swerve.TeleOpDrive;
 import frc.robot.commands.Wrist.RunWrist;
 import frc.robot.commands.Wrist.SequentialWristSetpoint;
@@ -145,6 +146,7 @@ public class RobotContainer {
         // Max travel is 29in 
 
         //ELEVATOR
+        //elevator.setDefaultCommand(new RunElevator(() -> Copilot.getRightY() * ElevatorConstants.ELEVATOR_CONTROL_SCALE)));
         elevator.setDefaultCommand(new RunElevator(() -> Math.abs(Copilot.getRightY() * ElevatorConstants.ELEVATOR_CONTROL_SCALE)));
         Copilot.start().onTrue(new InstantCommand(() -> elevator.ResetElevatorEncoders()));
         
@@ -153,6 +155,7 @@ public class RobotContainer {
         Copilot.leftBumper().whileTrue(new RunAlgaeIntake(() -> IntakeConstants.ALGAE_OUTTAKE_SPEED));
         Copilot.rightBumper().whileTrue(new RunAlgaeIntake(() -> IntakeConstants.ALGAE_INTAKE_SPEED)).onFalse(new RunAlgaeIntake(() -> IntakeConstants.ALGAE_OUTTAKE_SPEED).withTimeout(1));
 
+        // HEY DON'T FORGET TO UNCOMMENT THIS IF IT WORKS
         // Copilot.rightBumper().onTrue(new RunAlgaeIntake(() -> IntakeConstants.ALGAE_INTAKE_SPEED));
         // Copilot.rightBumper().toggleOnFalse(new RunAlgaeIntake(() -> IntakeConstants.ALGAE_OUTTAKE_SPEED).withTimeout(1));
 
@@ -259,11 +262,12 @@ public class RobotContainer {
             new SequentialElevatorSetpoint(ElevatorConstants.CORAL_STATION_POSITION),
             new ParallelCommandGroup(
                 new SetElevatorToPosition(ElevatorConstants.CORAL_STATION_POSITION),
-                new SetWristToPosition(WristConstants.CORAL_STATION_POSITION) 
+                new SetWristToPosition(WristConstants.CORAL_STATION_POSITION),
+                new RumbleCommand(pilot,0.5)
             )
         ));
 
-        Copilot.back().onTrue(new SequentialCommandGroup(new RunCoralIntake(() -> IntakeConstants.CORAL_OUTTAKE_SPEED).withTimeout(.15), new RunCoralIntake(() -> IntakeConstants.CORAL_INTAKE_SPEED).withTimeout(.15), new RunCoralIntake(() -> IntakeConstants.CORAL_OUTTAKE_SPEED).withTimeout(.15), new RunCoralIntake(() -> IntakeConstants.CORAL_INTAKE_SPEED).withTimeout(.15), new RunCoralIntake(() -> 0.0).withTimeout(0.15)));
+        Copilot.back().onTrue(new SequentialCommandGroup(new RunCoralIntake(() -> -IntakeConstants.CORAL_SHIMMY_SPEED).withTimeout(.15), new RunCoralIntake(() -> IntakeConstants.CORAL_SHIMMY_SPEED).withTimeout(.15), new RunCoralIntake(() -> -IntakeConstants.CORAL_SHIMMY_SPEED).withTimeout(.15), new RunCoralIntake(() -> IntakeConstants.CORAL_SHIMMY_SPEED).withTimeout(.15), new RunCoralIntake(() -> 0.0).withTimeout(0.15)));
     }
 
     public Command getAutonomousCommand() {

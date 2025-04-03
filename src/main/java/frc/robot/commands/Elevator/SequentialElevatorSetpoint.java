@@ -27,7 +27,7 @@ public class SequentialElevatorSetpoint extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if (Position < m_Elevator.GetLeftElevatorPosition()){
+    if (Position < m_Elevator.GetLeftElevatorPosition()){ 
       m_Elevator.MoveElevator(() -> ElevatorConstants.LOWER_ELEVATOR_SPEED);
     } else {
       m_Elevator.MoveElevatorToPosition(Position);

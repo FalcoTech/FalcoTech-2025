@@ -56,6 +56,7 @@ public final class Constants {
     // Safety thresholds for home position logic
     public static final double MIN_ELEVATOR_SAFETY_THRESHOLD = 1.0;
     public static final double MAX_ELEVATOR_SAFETY_THRESHOLD = 4.5;
+    public static final double PID_OUTPUT_LIMIT = 0.2;
   }
   
   public static final class WristConstants {
@@ -87,6 +88,7 @@ public final class Constants {
     
     public static final double CORAL_INTAKE_SPEED = 0.3;
     public static final double CORAL_OUTTAKE_SPEED = -0.2;
+    public static final double CORAL_SHIMMY_SPEED = 0.2;
   }
   
   public static final class ClimbConstants {
@@ -103,5 +105,18 @@ public final class Constants {
     // Field positions
     public static final Pose2d LEFT_FEEDER_POSE = new Pose2d(1.14, 6.93, Rotation2d.fromDegrees(127.16));
     public static final Pose2d ALGAE_SCORE_POSE = new Pose2d(5.98, .58, Rotation2d.fromDegrees(-90));
+  }
+
+  public static final class AlignmentConstants {
+    // Distance constants (in meters)
+    public static final double CORAL_FORWARD_DISTANCE = -0.4572;  // 18 inches away from tag
+    public static final double CORAL_LATERAL_DISTANCE = 0.1524;  // 6 inches for left/right offset
+    
+    // Tag-specific offset constants
+    public static final double CORAL_STATION_FORWARD_OFFSET = -0.610;  // 
+    public static final double CORAL_STATION_LATERAL_OFFSET = 0.610;  // 2ft
+    public static final double ALGAE_REEF_LATERAL_OFFSET = 0.0;  // No lateral offset
+    public static final double ALGAE_PROC_FORWARD_OFFSET = -0.5842;  // 23 in
+    public static final double BARGE_FORWARD_OFFSET = -1.0;  // 1 meter
   }
 }

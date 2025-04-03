@@ -10,6 +10,12 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
+  /**
+   * Rumbles the controller for a specified amount of time.
+   *
+   * @param controller The Xbox controller to rumble.
+   * @param rumbleTime The duration to rumble the controller in seconds.
+   */
 public class RumbleCommand extends Command {
   CommandXboxController mController;
   private Timer timer = new Timer();

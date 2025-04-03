@@ -21,6 +21,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.PathConstraints;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.AlignmentConstants;
 
 
 public class AlignmentSystem extends SubsystemBase {
@@ -31,10 +32,6 @@ public class AlignmentSystem extends SubsystemBase {
   private AprilTag targetTag;
   private Pose2d targetPose;
 
-  double CoralForwardDistance = -0.381;  // 15 inches in meters away from the tag
-  // double forwardDistance = -1;  // 1 meter
-  // double lateralDistance = 2;  // 2 meters
-  double CoralLateralDistance = 0.1524;  // 6 inches in meters for left/right offset
   private List<AprilTag> reefTags;
   private List<AprilTag> algaeProcTags;
   private List<AprilTag> coralStationTags;
@@ -122,8 +119,8 @@ public class AlignmentSystem extends SubsystemBase {
     // 5. Calculate the target position by offsetting OPPOSITE to the normal
     // and to the left or right according to offsetRight
     Translation2d targetPosition = tagPosition
-        .minus(new Translation2d(normalX * CoralForwardDistance, normalY * CoralForwardDistance))
-        .plus(new Translation2d(perpX * CoralLateralDistance, perpY * CoralLateralDistance));
+        .minus(new Translation2d(normalX * AlignmentConstants.CORAL_FORWARD_DISTANCE, normalY * AlignmentConstants.CORAL_FORWARD_DISTANCE))
+        .plus(new Translation2d(perpX * AlignmentConstants.CORAL_LATERAL_DISTANCE, perpY * AlignmentConstants.CORAL_LATERAL_DISTANCE));
     
     // 6. Set robot rotation to face the tag (opposite of tag's rotation)
     Rotation2d targetRotation = tagRotation.plus(new Rotation2d(Math.PI));
@@ -199,14 +196,14 @@ public class AlignmentSystem extends SubsystemBase {
   
 }
 
-public Command pathfindToNearestCoralStationAprilTag(boolean offsetRight) {
+public Command pathfindToNearestCoralStationAprilTag(double lateralOffset) {
   // Use a ProxyCommand to defer creation until execution time
   return Commands.defer(
     () -> {
       // This lambda runs when the command is actually scheduled (button pressed)
-      this.offsetRight = offsetRight;
+      // this.offsetRight = offsetRight;
       targetTag = getNearestTag(coralStationTags);
-      targetPose = getTargetPose(targetTag,CoralForwardDistance,.610); // 2ft
+      targetPose = getTargetPose(targetTag,AlignmentConstants.CORAL_FORWARD_DISTANCE, lateralOffset);
       
       // Return the actual command to be run
       return AutoBuilder.pathfindToPose(targetPose, m_pathConstraints, 0);
@@ -221,7 +218,7 @@ public Command pathfindToNearestAlgaeReefAprilTag() {
     () -> {
       // This lambda runs when the command is actually scheduled (button pressed)
       targetTag = getNearestTag(reefTags);
-      targetPose = getTargetPose(targetTag,CoralForwardDistance,0);
+      targetPose = getTargetPose(targetTag,AlignmentConstants.CORAL_FORWARD_DISTANCE,AlignmentConstants.ALGAE_REEF_LATERAL_OFFSET);
       
       // Return the actual command to be run
       return AutoBuilder.pathfindToPose(targetPose, m_pathConstraints, 0);
@@ -234,7 +231,7 @@ public Command pathfindToNearestAlgaeProcAprilTag() {
     () -> {
       // This lambda runs when the command is actually scheduled (button pressed)
       AprilTag targetTag = getNearestTag(algaeProcTags);
-      targetPose = getTargetPose(targetTag,-.508,0); // 1 ft
+      targetPose = getTargetPose(targetTag,AlignmentConstants.ALGAE_PROC_FORWARD_OFFSET,AlignmentConstants.ALGAE_REEF_LATERAL_OFFSET); // 1 ft
       
       // Return the actual command to be run
       return AutoBuilder.pathfindToPose(targetPose, m_pathConstraints, 0);
@@ -247,7 +244,7 @@ public Command pathfindToNearestCoralStationAprilTag() {
     () -> {
       // This lambda runs when the command is actually scheduled (button pressed)
       AprilTag targetTag = getNearestTag(coralStationTags);
-      targetPose = getTargetPose(targetTag,CoralForwardDistance,.305);
+      targetPose = getTargetPose(targetTag,AlignmentConstants.CORAL_STATION_FORWARD_OFFSET,AlignmentConstants.CORAL_STATION_LATERAL_OFFSET);
       
       // Return the actual command to be run
       return AutoBuilder.pathfindToPose(targetPose, m_pathConstraints, 0);
@@ -260,7 +257,7 @@ public Command pathfindToNearestBargeAprilTag() {
     () -> {
       // This lambda runs when the command is actually scheduled (button pressed)
       AprilTag targetTag = getNearestTag(bargeTags);
-      targetPose = getTargetPose(targetTag,-1,0); // 1 meter off
+      targetPose = getTargetPose(targetTag,AlignmentConstants.BARGE_FORWARD_OFFSET,AlignmentConstants.ALGAE_REEF_LATERAL_OFFSET); // 1 meter off
       // Return the actual command to be run
       return AutoBuilder.pathfindToPose(targetPose, m_pathConstraints, 0);
   }, Set.of(this));
