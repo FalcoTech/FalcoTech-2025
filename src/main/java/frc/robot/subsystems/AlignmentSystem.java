@@ -244,7 +244,7 @@ public Command pathfindToNearestCoralStationAprilTag() {
     () -> {
       // This lambda runs when the command is actually scheduled (button pressed)
       AprilTag targetTag = getNearestTag(coralStationTags);
-      targetPose = getTargetPose(targetTag,AlignmentConstants.CORAL_FORWARD_DISTANCE,AlignmentConstants.CORAL_STATION_LATERAL_OFFSET);
+      targetPose = getTargetPose(targetTag,AlignmentConstants.CORAL_STATION_FORWARD_OFFSET,AlignmentConstants.CORAL_STATION_LATERAL_OFFSET);
       
       // Return the actual command to be run
       return AutoBuilder.pathfindToPose(targetPose, m_pathConstraints, 0);

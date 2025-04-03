@@ -112,6 +112,7 @@ public final class Constants {
     public static final double CORAL_LATERAL_DISTANCE = 0.1524;  // 6 inches for left/right offset
     
     // Tag-specific offset constants
+    public static final double CORAL_STATION_FORWARD_OFFSET = -0.610;  // 
     public static final double CORAL_STATION_LATERAL_OFFSET = 0.610;  // 2ft
     public static final double ALGAE_REEF_LATERAL_OFFSET = 0.0;  // No lateral offset
     public static final double ALGAE_PROC_FORWARD_OFFSET = -0.5842;  // 23 in

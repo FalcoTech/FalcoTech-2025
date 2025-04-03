@@ -35,6 +35,7 @@ import frc.robot.commands.Coral.RunCoralIntake;
 import frc.robot.commands.Elevator.RunElevator;
 import frc.robot.commands.Elevator.SequentialElevatorSetpoint;
 import frc.robot.commands.Elevator.SetElevatorToPosition;
+import frc.robot.commands.Swerve.RumbleCommand;
 import frc.robot.commands.Swerve.TeleOpDrive;
 import frc.robot.commands.Wrist.RunWrist;
 import frc.robot.commands.Wrist.SequentialWristSetpoint;
@@ -260,7 +261,8 @@ public class RobotContainer {
             new SequentialElevatorSetpoint(ElevatorConstants.CORAL_STATION_POSITION),
             new ParallelCommandGroup(
                 new SetElevatorToPosition(ElevatorConstants.CORAL_STATION_POSITION),
-                new SetWristToPosition(WristConstants.CORAL_STATION_POSITION) 
+                new SetWristToPosition(WristConstants.CORAL_STATION_POSITION),
+                new RumbleCommand(pilot,0.5)
             )
         ));
 
