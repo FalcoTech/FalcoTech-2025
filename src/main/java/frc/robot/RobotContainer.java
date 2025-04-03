@@ -284,10 +284,10 @@ public class RobotContainer {
         NamedCommands.registerCommand("L4 Arrive", L4Arrive());
         NamedCommands.registerCommand("L4 Hold", L4Hold());
         NamedCommands.registerCommand("L4 Score", L4Score());
-        NamedCommands.registerCommand("L4 Arrive", L4Arrive());
         NamedCommands.registerCommand("L4 Backoff and Home", BackoffL4andHome());
 
         NamedCommands.registerCommand("Coral Station Arrive", CoralStationArrive());
+        NamedCommands.registerCommand("Coral Station Hold", CoralStationHold());
         NamedCommands.registerCommand("Coral Station Grab", CoralStationGrab());
     }
 
@@ -374,10 +374,16 @@ public class RobotContainer {
             )
         );
     }
+    public Command CoralStationHold(){
+        return new ParallelRaceGroup(
+            new SetElevatorToPosition(ElevatorConstants.CORAL_STATION_POSITION),
+            new SetWristToPosition(WristConstants.CORAL_STATION_POSITION)
+        );
+    }
     public Command CoralStationGrab(){
         return new ParallelRaceGroup(
-            new SetElevatorToPosition(ElevatorConstants.L4_SCORE_POSITION),
-            new SetWristToPosition(WristConstants.L4_SCORE_POSITION),
+            new SetElevatorToPosition(ElevatorConstants.CORAL_STATION_POSITION),
+            new SetWristToPosition(WristConstants.CORAL_STATION_POSITION),
             new RunCoralIntake(() -> IntakeConstants.CORAL_INTAKE_SPEED).withTimeout(5)
         );
     }
