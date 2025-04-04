@@ -10,6 +10,7 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.jni.SwerveJNI.DriveState;
+import com.fasterxml.jackson.databind.util.Named;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
@@ -166,7 +167,7 @@ public class RobotContainer {
         //WRIST
         wrist.setDefaultCommand(new RunWrist(() -> Copilot.getLeftY()));
         //Climb
-        pilot.povLeft().whileTrue(climb.RunClimbCommand(() -> ClimbConstants.CLIMB_SPEED));
+        pilot.povLeft().whileTrue(climb.RunClimbCommand(() -> ClimbConstants.CLIMB_SPEED)); //CLIMB
         pilot.povRight().whileTrue(climb.RunClimbCommand(() -> -ClimbConstants.CLIMB_SPEED));
         
 
@@ -293,6 +294,14 @@ public class RobotContainer {
         NamedCommands.registerCommand("Coral Station Arrive", CoralStationArrive());
         NamedCommands.registerCommand("Coral Station Hold", CoralStationHold());
         NamedCommands.registerCommand("Coral Station Grab", CoralStationGrab());
+
+        NamedCommands.registerCommand("Algae L3 Grab", AlgaeL3Grab());
+        NamedCommands.registerCommand("Algae L3 Arrive", AlgaeL3Arrive());
+        NamedCommands.registerCommand("Algae Score Proc", AlgaeScoreProc());
+        NamedCommands.registerCommand("Algae Hold Proc", AlgaeHoldProc());
+
+        NamedCommands.registerCommand("Coral L2 Hold", CoralL2Hold());
+        NamedCommands.registerCommand("Coral L2 Score", CoralL2Score());
     }
 
     public Command ElevatorL3Score(){
@@ -357,7 +366,7 @@ public class RobotContainer {
         return new ParallelRaceGroup(
             new SetElevatorToPosition(ElevatorConstants.L4_SCORE_POSITION),
             new SetWristToPosition(WristConstants.L4_SCORE_POSITION),
-            new RunCoralIntake(() -> IntakeConstants.CORAL_OUTTAKE_SPEED).withTimeout(2)
+            new RunCoralIntake(() -> IntakeConstants.CORAL_OUTTAKE_SPEED).withTimeout(1.5)
         );
     }
     public Command BackoffL4andHome(){
@@ -366,7 +375,7 @@ public class RobotContainer {
                 new SequentialWristSetpoint(WristConstants.HOME_POSITION).withTimeout(2),
                 new SetElevatorToPosition(ElevatorConstants.L4_SCORE_POSITION)
             ),
-            new SetElevatorToPosition(ElevatorConstants.HOME_POSITION).withTimeout(.75)
+            new SetElevatorToPosition(ElevatorConstants.HOME_POSITION).withTimeout(.25)
         );
     }
     public Command CoralStationArrive(){
@@ -388,7 +397,52 @@ public class RobotContainer {
         return new ParallelRaceGroup(
             new SetElevatorToPosition(ElevatorConstants.CORAL_STATION_POSITION),
             new SetWristToPosition(WristConstants.CORAL_STATION_POSITION),
-            new RunCoralIntake(() -> IntakeConstants.CORAL_INTAKE_SPEED).withTimeout(5)
+            new RunCoralIntake(() -> IntakeConstants.CORAL_INTAKE_SPEED).withTimeout(4)
+        );
+    }
+    public Command AlgaeL3Arrive(){
+        return new SequentialCommandGroup(
+            new SequentialElevatorSetpoint(ElevatorConstants.L3_ALGAE_POSITION),
+            new ParallelRaceGroup(
+                new SetElevatorToPosition(ElevatorConstants.L3_ALGAE_POSITION),
+                new SequentialWristSetpoint(WristConstants.L3_ALGAE_POSITION).withTimeout(3.5)
+            )
+        );
+    }
+    public Command AlgaeL3Grab(){
+        return new ParallelRaceGroup(
+            new SetElevatorToPosition(ElevatorConstants.L3_ALGAE_POSITION),
+            new SetWristToPosition(WristConstants.L3_ALGAE_POSITION),
+            new RunCoralIntake(() -> IntakeConstants.ALGAE_INTAKE_SPEED).withTimeout(3)
+        );
+    }
+
+    public Command AlgaeHoldProc(){
+        return new ParallelCommandGroup(
+            new SetElevatorToPosition(ElevatorConstants.ALGAE_PROCESSOR_POSITION),
+            new SetWristToPosition(WristConstants.ALGAE_PROCESSOR_POSITION),
+            new RunCoralIntake(() -> IntakeConstants.ALGAE_INTAKE_SPEED)
+        );
+    }
+    public Command AlgaeScoreProc(){
+        return new ParallelCommandGroup(
+            new SetElevatorToPosition(ElevatorConstants.ALGAE_PROCESSOR_POSITION),
+            new SetWristToPosition(WristConstants.ALGAE_PROCESSOR_POSITION),
+            new RunAlgaeIntake(() -> IntakeConstants.ALGAE_OUTTAKE_SPEED)
+        );
+    }
+
+    public Command CoralL2Hold(){
+        return new ParallelCommandGroup(
+            new SetElevatorToPosition(ElevatorConstants.L2_SCORE_POSITION),
+            new SetWristToPosition(WristConstants.L2_SCORE_POSITION)
+        );
+    }
+    public Command CoralL2Score(){
+        return new ParallelRaceGroup(
+            new SetElevatorToPosition(ElevatorConstants.L2_SCORE_POSITION),
+            new SetWristToPosition(WristConstants.L2_SCORE_POSITION),
+            new RunCoralIntake(() -> IntakeConstants.CORAL_OUTTAKE_SPEED).withTimeout(1.75)
         );
     }
 }

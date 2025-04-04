@@ -8,20 +8,20 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 5.301578121875207,
-        "y": 2.9127081841202234
+        "x": 5.293373186379149,
+        "y": 2.908143248100588
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 5.270868840492555,
-        "y": 2.996743240793374
+        "x": 5.269,
+        "y": 2.9849579513154634
       },
       "prevControl": {
-        "x": 5.394629534139153,
-        "y": 2.7795260897483587
+        "x": 5.387056929637507,
+        "y": 2.764588803373732
       },
       "nextControl": null,
       "isLocked": false,
@@ -34,7 +34,7 @@
   "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 0.5,
-    "maxAcceleration": 0.5,
+    "maxAcceleration": 1.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
@@ -45,7 +45,7 @@
     "rotation": 119.99999999999999
   },
   "reversed": false,
-  "folder": null,
+  "folder": "L4 PROC",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 119.99999999999999

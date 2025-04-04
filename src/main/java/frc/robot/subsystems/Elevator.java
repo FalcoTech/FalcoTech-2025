@@ -78,7 +78,7 @@ public class Elevator extends SubsystemBase {
 
   public void MoveElevatorToPosition(double position){
     double PIDOutput = ElevatorPID.calculate(GetLeftElevatorPosition(), position) + ElevatorFF.calculate(position);
-    double CommandedOutput = Math.copySign(Math.min(Math.abs(PIDOutput), 0.2), PIDOutput);
+    double CommandedOutput = Math.copySign(Math.min(Math.abs(PIDOutput), 0.3), PIDOutput);
     // double CommandedOutput = MathUtil.clamp(PIDOutput, -ElevatorConstants.PID_OUTPUT_LIMIT, ElevatorConstants.PID_OUTPUT_LIMIT);
     // @Gavin - Is this why the elevator is moving so slow?!!!
     LeftElevatorMotor.set(CommandedOutput);

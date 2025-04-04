@@ -45,7 +45,7 @@
     "rotation": 180.0
   },
   "reversed": false,
-  "folder": null,
+  "folder": "L4 MID",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 180.0
